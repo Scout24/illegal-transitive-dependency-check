@@ -54,27 +54,27 @@ public class IllegalTransitiveDependencyCheck implements EnforcerRule {
       logger.info("Flag 'reportOnly' is set. Exceptions from rule will only be reported!");
     }
 
-    initializeArtefactResolver(helper);
+    initializeArtifactResolver(helper);
 
     initializeProject(helper);
 
-    final Artifact artifact = resolveArtefact();
+    final Artifact artifact = resolveArtifact();
 
-    final Repository artefactClassesRepository = ArtefactRepositoryAnalyzer.analyzeArtefacts(logger,
+    final Repository artifactClassesRepository = ArtifactRepositoryAnalyzer.analyzeArtifacts(logger,
       true, regexIgnoredClasses)
-      .analyzeArtefacts(Collections.singleton(artifact));
+      .analyzeArtifacts(Collections.singleton(artifact));
 
     final Set<Artifact> dependencies = resolveDirectDependencies(artifact);
 
-    final Repository dependenciesClassesRepository = ArtefactRepositoryAnalyzer.analyzeArtefacts(logger,
+    final Repository dependenciesClassesRepository = ArtifactRepositoryAnalyzer.analyzeArtifacts(logger,
       false, regexIgnoredClasses)
-      .analyzeArtefacts(dependencies);
+      .analyzeArtifacts(dependencies);
 
-    logger.debug("Artifact's type dependencies are: " + artefactClassesRepository.getDependencies());
+    logger.debug("Artifact's type dependencies are: " + artifactClassesRepository.getDependencies());
     logger.debug("Classes defined in direct dependencies are: " + dependenciesClassesRepository.getTypes());
 
-    final List<String> unresolvedTypes = new ArrayList<>(artefactClassesRepository.getDependencies());
-    unresolvedTypes.removeAll(artefactClassesRepository.getTypes());
+    final List<String> unresolvedTypes = new ArrayList<>(artifactClassesRepository.getDependencies());
+    unresolvedTypes.removeAll(artifactClassesRepository.getTypes());
     unresolvedTypes.removeAll(dependenciesClassesRepository.getTypes());
 
     if (unresolvedTypes.isEmpty()) {
@@ -117,7 +117,7 @@ public class IllegalTransitiveDependencyCheck implements EnforcerRule {
     logger.debug("Analyze project '" + project + "'.");
   }
 
-  private void initializeArtefactResolver(EnforcerRuleHelper helper) throws EnforcerRuleException {
+  private void initializeArtifactResolver(EnforcerRuleHelper helper) throws EnforcerRuleException {
     try {
       resolver = (ArtifactResolver) helper.getComponent(ArtifactResolver.class);
     } catch (ComponentLookupException e) {
@@ -125,11 +125,11 @@ public class IllegalTransitiveDependencyCheck implements EnforcerRule {
     }
   }
 
-  private Artifact resolveArtefact() throws EnforcerRuleException {
+  private Artifact resolveArtifact() throws EnforcerRuleException {
     final Artifact artifact = project.getArtifact();
-    logger.info("Analyze dependencies of artefact '" + artifact.getId() + "'.");
+    logger.info("Analyze dependencies of artifact '" + artifact.getId() + "'.");
 
-    enforceArtefactResolution(artifact);
+    enforceArtifactResolution(artifact);
     return artifact;
   }
 
@@ -139,7 +139,7 @@ public class IllegalTransitiveDependencyCheck implements EnforcerRule {
     final StringBuilder illegalDependencies = new StringBuilder();
     illegalDependencies.append("Found ")
     .append(unresolvedTypes.size())
-    .append(" illegal transitive type dependencies in artefact '")
+    .append(" illegal transitive type dependencies in artifact '")
     .append(artifact.getId())
     .append("':\n");
 
@@ -177,11 +177,11 @@ public class IllegalTransitiveDependencyCheck implements EnforcerRule {
     }
   }
 
-  private void enforceArtefactResolution(Artifact artifact) throws EnforcerRuleException {
+  private void enforceArtifactResolution(Artifact artifact) throws EnforcerRuleException {
     try {
       resolver.resolve(artifact, remoteRepositories, localRepository);
     } catch (AbstractArtifactResolutionException e) {
-      final String error = "Unable to resolve artefact '" + artifact.getId() + "'!";
+      final String error = "Unable to resolve artifact '" + artifact.getId() + "'!";
       logger.error(error, e);
       throw new EnforcerRuleException(error, e);
     }
@@ -213,14 +213,14 @@ public class IllegalTransitiveDependencyCheck implements EnforcerRule {
     this.reportOnly = reportOnly;
   }
 
+  /**
+   * A reggular expression that matches classes to be excluded from analyzes (e.g. 'de\.foo\.Foo.*')
+   */
   public String[] getRegexIgnoredClasses() {
     return regexIgnoredClasses;
   }
 
-  /**
-   * A reggular expression that matches classes to be excluded from analyzes (e.g. 'de\.foo\.Foo.*')
-   */
-  public void setRegexIgnoredClasses(String[] ignoreClasses) {
-    this.regexIgnoredClasses = ignoreClasses;
+  public void setRegexIgnoredClasses(String[] regexIgnoredClasses) {
+    this.regexIgnoredClasses = regexIgnoredClasses;
   }
 }

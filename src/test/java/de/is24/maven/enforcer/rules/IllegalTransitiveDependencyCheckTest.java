@@ -41,9 +41,9 @@ import java.util.zip.ZipOutputStream;
 
 public class IllegalTransitiveDependencyCheckTest {
   private static final Logger LOG = LoggerFactory.getLogger(IllegalTransitiveDependencyCheckTest.class);
-  private static final String ARTIFACT_ID = "some-artefact";
-  private static final String DEPENDENCY_ARTIFACT_ID = "dependency-artefact";
-  private static final String TRANSITIVE_DEPENDENCY_ARTIFACT_ID = "transitive-dependency-artefact";
+  private static final String ARTIFACT_ID = "some-artifact";
+  private static final String DEPENDENCY_ARTIFACT_ID = "dependency-artifact";
+  private static final String TRANSITIVE_DEPENDENCY_ARTIFACT_ID = "transitive-dependency-artifact";
   private static final String GROUP_ID = "some-group";
   private static final String ARTIFACT_VERSION = "1.0";
   private static final String CLASS_SUFFIX = ".class";
@@ -74,7 +74,7 @@ public class IllegalTransitiveDependencyCheckTest {
   }
 
   @Before
-  public void prepareArtefactStubFactory() throws IOException {
+  public void prepareArtifactStubFactory() throws IOException {
     factory = new ArtifactStubFactory();
     factory.setWorkingDir(folder.newFolder("repository"));
     factory.setCreateFiles(true);
@@ -107,19 +107,19 @@ public class IllegalTransitiveDependencyCheckTest {
     helper.addComponent(new StubArtifactResolver(factory, false, false), ArtifactResolver.class);
 
 
-    final Artifact artefact = factory.createArtifact(GROUP_ID, ARTIFACT_ID, ARTIFACT_VERSION);
-    project.setArtifact(artefact);
+    final Artifact artifact = factory.createArtifact(GROUP_ID, ARTIFACT_ID, ARTIFACT_VERSION);
+    project.setArtifact(artifact);
     project.setArtifactId(ARTIFACT_ID);
     project.setGroupId(GROUP_ID);
     project.setVersion(ARTIFACT_VERSION);
 
-    makeArtefactJarFromClassFile(artefact, ClassInMavenProjectSource.class);
+    makeArtifactJarFromClassFile(artifact, ClassInMavenProjectSource.class);
 
 
     final Artifact dependency = factory.createArtifact(GROUP_ID, DEPENDENCY_ARTIFACT_ID, ARTIFACT_VERSION);
 
     // add the direct dependency and it's children
-    makeArtefactJarFromClassFile(dependency, ClassInDirectDependency.class,
+    makeArtifactJarFromClassFile(dependency, ClassInDirectDependency.class,
       ClassInDirectDependency.EnumInClassInDirectDependency.class);
 
 
@@ -127,14 +127,14 @@ public class IllegalTransitiveDependencyCheckTest {
       ARTIFACT_VERSION);
 
     // add the transitive dependency and the enclosed annotation
-    makeArtefactJarFromClassFile(transitiveDependency, ClassInTransitiveDependency.class,
+    makeArtifactJarFromClassFile(transitiveDependency, ClassInTransitiveDependency.class,
       ClassInTransitiveDependency.SomeUsefulAnnotation.class);
 
     final Artifact anotherTransitiveDependency = factory.createArtifact(GROUP_ID,
       TRANSITIVE_DEPENDENCY_ARTIFACT_ID + "2",
       ARTIFACT_VERSION);
 
-    makeArtefactJarFromClassFile(anotherTransitiveDependency, ClassInAnotherTransitiveDependency.class,
+    makeArtifactJarFromClassFile(anotherTransitiveDependency, ClassInAnotherTransitiveDependency.class,
       ClassInAnotherTransitiveDependency.EnumInClassInAnotherTransitiveDependency.class);
 
     // set projects direct dependencies
@@ -147,17 +147,16 @@ public class IllegalTransitiveDependencyCheckTest {
     dependencies.add(anotherTransitiveDependency);
     project.setArtifacts(dependencies);
 
-    LOG.info("Artefact [{}].", artefact);
+    LOG.info("Artifact [{}].", artifact);
 
-    LOG.info("Dependencies of [{}] are {}.", artefact, project.getDependencyArtifacts());
-    LOG.info("Transitive dependencies of [{}] are {}.", artefact, project.getArtifacts());
+    LOG.info("Dependencies of [{}] are {}.", artifact, project.getDependencyArtifacts());
+    LOG.info("Transitive dependencies of [{}] are {}.", artifact, project.getArtifacts());
     return helper;
   }
 
-  private void makeArtefactJarFromClassFile(Artifact artefact, Class<?>... classes) {
-    artefact.setFile(replaceJarWithPacketClassFile(artefact.getFile(), makeClassFilesInJarSet(classes)));
+  private void makeArtifactJarFromClassFile(Artifact artifact, Class<?>... classes) {
+    artifact.setFile(replaceJarWithPacketClassFile(artifact.getFile(), makeClassFilesInJarSet(classes)));
   }
-
 
   private File replaceJarWithPacketClassFile(File jar, Set<ClassFileInJar> classFilesInJar) {
     final String fileName = jar.getAbsolutePath();
