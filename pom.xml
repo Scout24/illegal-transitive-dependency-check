@@ -35,7 +35,8 @@
   <properties>
     <enforcer.plugin.version>1.3.1</enforcer.plugin.version>
     <build.plugin.version>3.1</build.plugin.version>
-    <release.plugin.version>2.4.1</release.plugin.version>
+    <release.plugin.version>2.4.2</release.plugin.version>
+    <gitexe.plugin.version>1.8.1</gitexe.plugin.version>
     <maven.version>2.0.9</maven.version>
     <sl4j.version>1.7.6</sl4j.version>
     <asm.version>3.1</asm.version>
@@ -58,6 +59,13 @@
         <configuration>
           <tagNameFormat>release-@{project.version}</tagNameFormat>
         </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.maven.scm</groupId>
+            <artifactId>maven-scm-provider-gitexe</artifactId>
+            <version>${gitexe.plugin.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>
