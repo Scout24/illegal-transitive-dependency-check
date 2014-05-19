@@ -12,9 +12,18 @@
   <description>This rule checks whether the code uses classes of another module through transitive dependencies.
   </description>
 
+  <scm>
+    <connection>scm:git:ssh://github.com/ImmobilienScout24/illegal-transitive-dependency-check.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/ImmobilienScout24/illegal-transitive-dependency-check.git
+    </developerConnection>
+    <url>https://github.com/ImmobilienScout24/illegal-transitive-dependency-check.git</url>
+    <tag>HEAD</tag>
+  </scm>
+
   <properties>
     <enforcer.plugin.version>1.3.1</enforcer.plugin.version>
     <build.plugin.version>3.1</build.plugin.version>
+    <release.plugin.version>2.4.1</release.plugin.version>
     <maven.version>2.0.9</maven.version>
     <sl4j.version>1.7.6</sl4j.version>
     <asm.version>3.1</asm.version>
@@ -30,9 +39,19 @@
           <target>1.7</target>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>${release.plugin.version}</version>
+        <configuration>
+          <tagNameFormat>v@{project.version}</tagNameFormat>
+          <preparationGoals>clean verify</preparationGoals>
+          <goals>deploy</goals>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
-  
+
   <dependencies>
     <dependency>
       <groupId>org.apache.maven.enforcer</groupId>
