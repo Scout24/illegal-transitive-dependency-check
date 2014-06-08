@@ -1,4 +1,4 @@
-The 'Illegal' Transitive Dependency Check Rule
+The 'Illegal' Transitive Dependency Check Rule [![Build Status](https://travis-ci.org/ImmobilienScout24/illegal-transitive-dependency-check.png?branch=master)](https://travis-ci.org/ImmobilienScout24/illegal-transitive-dependency-check)
 ==============================================
 
 The `IllegalTransitiveDependencyCheck` is an additional rule for the `maven-enforcer-plugin`. The rule checks if 
