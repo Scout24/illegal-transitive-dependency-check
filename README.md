@@ -1,6 +1,8 @@
 The 'Illegal' Transitive Dependency Check Rule
 ==============================================
 
+[![Build Status](https://travis-ci.org/ImmobilienScout24/illegal-transitive-dependency-check.png?branch=master)](https://travis-ci.org/ImmobilienScout24/illegal-transitive-dependency-check)
+
 The `IllegalTransitiveDependencyCheck` is an additional rule for the `maven-enforcer-plugin`. The rule checks if 
 all classes in a certain artifact references only classes that are provided by explicitly declared dependencies. 
 Thus the rule will list (or complain about) all classes that are only available through transitive dependencies.
