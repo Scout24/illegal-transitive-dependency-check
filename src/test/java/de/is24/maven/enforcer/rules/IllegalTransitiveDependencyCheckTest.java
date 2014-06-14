@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -95,7 +96,7 @@ public class IllegalTransitiveDependencyCheckTest {
 
     final IllegalTransitiveDependencyCheck rule = new IllegalTransitiveDependencyCheck();
     rule.setReportOnly(true);
-    rule.setRegexIgnoredClasses(new String[] { "" });
+    rule.setRegexIgnoredClasses(new String[]{""});
 
     TestEnforcerRuleUtils.execute(rule, helper, false);
   }
@@ -120,22 +121,22 @@ public class IllegalTransitiveDependencyCheckTest {
 
     // add the direct dependency and it's children
     makeArtifactJarFromClassFile(dependency, ClassInDirectDependency.class,
-      ClassInDirectDependency.EnumInClassInDirectDependency.class);
+        ClassInDirectDependency.EnumInClassInDirectDependency.class);
 
 
     final Artifact transitiveDependency = factory.createArtifact(GROUP_ID, TRANSITIVE_DEPENDENCY_ARTIFACT_ID,
-      ARTIFACT_VERSION);
+        ARTIFACT_VERSION);
 
     // add the transitive dependency and the enclosed annotation
     makeArtifactJarFromClassFile(transitiveDependency, ClassInTransitiveDependency.class,
-      ClassInTransitiveDependency.SomeUsefulAnnotation.class);
+        ClassInTransitiveDependency.SomeUsefulAnnotation.class);
 
     final Artifact anotherTransitiveDependency = factory.createArtifact(GROUP_ID,
-      TRANSITIVE_DEPENDENCY_ARTIFACT_ID + "2",
-      ARTIFACT_VERSION);
+        TRANSITIVE_DEPENDENCY_ARTIFACT_ID + "2",
+        ARTIFACT_VERSION);
 
     makeArtifactJarFromClassFile(anotherTransitiveDependency, ClassInAnotherTransitiveDependency.class,
-      ClassInAnotherTransitiveDependency.EnumInClassInAnotherTransitiveDependency.class);
+        ClassInAnotherTransitiveDependency.EnumInClassInAnotherTransitiveDependency.class);
 
     // set projects direct dependencies
     project.setDependencyArtifacts(Collections.singleton(dependency));
@@ -165,9 +166,9 @@ public class IllegalTransitiveDependencyCheckTest {
     final File newJar = new File(fileName);
 
     try {
-      try(ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(jar))) {
+      try (ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(jar))) {
         for (ClassFileInJar classFileInJar : classFilesInJar) {
-          try(InputStream in = new FileInputStream(classFileInJar.getClassFile())) {
+          try (InputStream in = new FileInputStream(classFileInJar.getClassFile())) {
             final byte[] buffer = new byte[1024];
 
             zipOutputStream.putNextEntry(new ZipEntry(classFileInJar.getResource()));
@@ -222,10 +223,6 @@ public class IllegalTransitiveDependencyCheckTest {
 
     private EnforcerRuleHelperWrapper(EnforcerRuleHelper wrappedEnforcerRuleHelper) {
       this.wrappedEnforcerRuleHelper = wrappedEnforcerRuleHelper;
-    }
-
-    void addComponent(Object component, String key) {
-      components.put(key, component);
     }
 
     void addComponent(Object component, Class<?> key) {
