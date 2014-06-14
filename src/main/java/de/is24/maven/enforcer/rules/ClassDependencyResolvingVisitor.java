@@ -138,7 +138,7 @@ final class ClassDependencyResolvingVisitor implements ClassVisitor {
     return readTypeName(type);
   }
 
-  private String readTypeName(Type type) {
+  private static String readTypeName(Type type) {
     switch (type.getSort()) {
       case Type.ARRAY: {
         return readTypeName(type.getElementType());

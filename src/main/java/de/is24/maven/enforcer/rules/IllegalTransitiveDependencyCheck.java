@@ -12,6 +12,7 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -27,8 +28,10 @@ import java.util.Set;
  *
  * @author aschubert
  */
-public class IllegalTransitiveDependencyCheck implements EnforcerRule {
+class IllegalTransitiveDependencyCheck implements EnforcerRule {
   private static final String NO_CACHE_ID_AVAILABLE = null;
+  private static final String OUTPUT_FILE_EXTENSION = ".txt";
+  private static final String OUTPUT_FILE_PREFIX = "itd-";
 
   private ArtifactResolver resolver;
 
@@ -61,14 +64,14 @@ public class IllegalTransitiveDependencyCheck implements EnforcerRule {
     final Artifact artifact = resolveArtifact();
 
     final Repository artifactClassesRepository = ArtifactRepositoryAnalyzer.analyzeArtifacts(logger,
-      true, regexIgnoredClasses)
-      .analyzeArtifacts(Collections.singleton(artifact));
+        true, regexIgnoredClasses)
+        .analyzeArtifacts(Collections.singleton(artifact));
 
     final Set<Artifact> dependencies = resolveDirectDependencies(artifact);
 
     final Repository dependenciesClassesRepository = ArtifactRepositoryAnalyzer.analyzeArtifacts(logger,
-      false, regexIgnoredClasses)
-      .analyzeArtifacts(dependencies);
+        false, regexIgnoredClasses)
+        .analyzeArtifacts(dependencies);
 
     logger.debug("Artifact's type dependencies are: " + artifactClassesRepository.getDependencies());
     logger.debug("Classes defined in direct dependencies are: " + dependenciesClassesRepository.getTypes());
@@ -133,15 +136,15 @@ public class IllegalTransitiveDependencyCheck implements EnforcerRule {
     return artifact;
   }
 
-  private String buildOutput(Artifact artifact, List<String> unresolvedTypes) {
+  private static String buildOutput(Artifact artifact, List<String> unresolvedTypes) {
     Collections.sort(unresolvedTypes);
 
     final StringBuilder illegalDependencies = new StringBuilder();
     illegalDependencies.append("Found ")
-    .append(unresolvedTypes.size())
-    .append(" illegal transitive type dependencies in artifact '")
-    .append(artifact.getId())
-    .append("':\n");
+        .append(unresolvedTypes.size())
+        .append(" illegal transitive type dependencies in artifact '")
+        .append(artifact.getId())
+        .append("':\n");
 
     int k = 1;
     for (String illegalDependency : unresolvedTypes) {
@@ -157,10 +160,8 @@ public class IllegalTransitiveDependencyCheck implements EnforcerRule {
       return;
     }
 
-    final String fileName = outputDirectory + (outputDirectory.endsWith("/") ? "" : "/") +
-      "itd-" + artifact.getId().replace(':', '-') + ".txt";
-
-    final File outputFile = new File(fileName);
+    final String outputFilePath = determineOutputFilePath(artifact);
+    final File outputFile = new File(outputFilePath);
     final File targetFolder = outputFile.getParentFile();
     if (!targetFolder.exists() && !targetFolder.mkdirs()) {
       final String error = "Unable to create directory '" + targetFolder + "'!";
@@ -168,13 +169,19 @@ public class IllegalTransitiveDependencyCheck implements EnforcerRule {
       throw new EnforcerRuleException(error);
     }
 
-    try(FileWriter resultFileWriter = new FileWriter(outputFile)) {
+    try (FileWriter resultFileWriter = new FileWriter(outputFile)) {
       resultFileWriter.write(output);
     } catch (IOException e) {
-      final String error = "Unable to write output file '" + fileName + "'!";
+      final String error = "Unable to write output file '" + outputFilePath + "'!";
       logger.error(error, e);
       throw new EnforcerRuleException(error, e);
     }
+  }
+
+  private String determineOutputFilePath(Artifact artifact) {
+    final String separator = outputDirectory.endsWith("/") ? "" : "/";
+    final String formattedArtifactId = artifact.getId().replace(':', '-');
+    return outputDirectory + separator + OUTPUT_FILE_PREFIX + formattedArtifactId + OUTPUT_FILE_EXTENSION;
   }
 
   private void enforceArtifactResolution(Artifact artifact) throws EnforcerRuleException {
@@ -202,22 +209,8 @@ public class IllegalTransitiveDependencyCheck implements EnforcerRule {
     return NO_CACHE_ID_AVAILABLE;
   }
 
-  /**
-   * This parameter determines if the rule will break the build or not...
-   */
-  public boolean isReportOnly() {
-    return reportOnly;
-  }
-
   public void setReportOnly(boolean reportOnly) {
     this.reportOnly = reportOnly;
-  }
-
-  /**
-   * A reggular expression that matches classes to be excluded from analyzes (e.g. 'de\.foo\.Foo.*')
-   */
-  public String[] getRegexIgnoredClasses() {
-    return regexIgnoredClasses;
   }
 
   public void setRegexIgnoredClasses(String[] regexIgnoredClasses) {

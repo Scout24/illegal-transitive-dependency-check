@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import static java.lang.String.format;
+
 
 final class Repository {
   private static final String JAVA_TYPES_REGEX = "[BSCFIJVDL]|(java\\.[\\w\\.\\$]*)";
@@ -60,10 +62,6 @@ final class Repository {
 
   @Override
   public String toString() {
-    final StringBuilder sb = new StringBuilder("Repository{");
-    sb.append("types=").append(types);
-    sb.append(", dependencies=").append(dependencies);
-    sb.append('}');
-    return sb.toString();
+    return format("Repository{types=%s, dependencies=%s}", types, dependencies);
   }
 }
