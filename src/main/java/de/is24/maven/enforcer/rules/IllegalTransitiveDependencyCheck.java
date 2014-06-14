@@ -30,6 +30,8 @@ import java.util.Set;
  */
 class IllegalTransitiveDependencyCheck implements EnforcerRule {
   private static final String NO_CACHE_ID_AVAILABLE = null;
+  private static final String OUTPUT_FILE_EXTENSION = ".txt";
+  private static final String OUTPUT_FILE_PREFIX = "itd-";
 
   private ArtifactResolver resolver;
 
@@ -158,10 +160,8 @@ class IllegalTransitiveDependencyCheck implements EnforcerRule {
       return;
     }
 
-    final String fileName = outputDirectory + (outputDirectory.endsWith("/") ? "" : "/") +
-        "itd-" + artifact.getId().replace(':', '-') + ".txt";
-
-    final File outputFile = new File(fileName);
+    final String outputFilePath = determineOutputFilePath(artifact);
+    final File outputFile = new File(outputFilePath);
     final File targetFolder = outputFile.getParentFile();
     if (!targetFolder.exists() && !targetFolder.mkdirs()) {
       final String error = "Unable to create directory '" + targetFolder + "'!";
@@ -172,10 +172,16 @@ class IllegalTransitiveDependencyCheck implements EnforcerRule {
     try (FileWriter resultFileWriter = new FileWriter(outputFile)) {
       resultFileWriter.write(output);
     } catch (IOException e) {
-      final String error = "Unable to write output file '" + fileName + "'!";
+      final String error = "Unable to write output file '" + outputFilePath + "'!";
       logger.error(error, e);
       throw new EnforcerRuleException(error, e);
     }
+  }
+
+  private String determineOutputFilePath(Artifact artifact) {
+    final String separator = outputDirectory.endsWith("/") ? "" : "/";
+    final String formattedArtifactId = artifact.getId().replace(':', '-');
+    return outputDirectory + separator + OUTPUT_FILE_PREFIX + formattedArtifactId + OUTPUT_FILE_EXTENSION;
   }
 
   private void enforceArtifactResolution(Artifact artifact) throws EnforcerRuleException {
