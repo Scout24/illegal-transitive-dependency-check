@@ -39,6 +39,8 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static java.lang.String.format;
+
 
 public class IllegalTransitiveDependencyCheckTest {
   private static final Logger LOG = LoggerFactory.getLogger(IllegalTransitiveDependencyCheckTest.class);
@@ -209,11 +211,7 @@ public class IllegalTransitiveDependencyCheckTest {
 
     @Override
     public String toString() {
-      final StringBuilder sb = new StringBuilder("ClassFileInJar{");
-      sb.append("resource='").append(resource).append('\'');
-      sb.append(", classFile=").append(classFile);
-      sb.append('}');
-      return sb.toString();
+      return format("ClassFileInJar{resource='%s', classFile=%s}", resource, classFile);
     }
   }
 
