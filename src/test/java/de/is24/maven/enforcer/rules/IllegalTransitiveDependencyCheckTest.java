@@ -49,7 +49,7 @@ public class IllegalTransitiveDependencyCheckTest {
   private static final String CLASS_SUFFIX = ".class";
 
   @Rule
-  public TemporaryFolder folder = new TemporaryFolder();
+  public final TemporaryFolder folder = new TemporaryFolder();
 
   private ArtifactStubFactory factory;
 
