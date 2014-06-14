@@ -134,7 +134,7 @@ class IllegalTransitiveDependencyCheck implements EnforcerRule {
     return artifact;
   }
 
-  private String buildOutput(Artifact artifact, List<String> unresolvedTypes) {
+  private static String buildOutput(Artifact artifact, List<String> unresolvedTypes) {
     Collections.sort(unresolvedTypes);
 
     final StringBuilder illegalDependencies = new StringBuilder();

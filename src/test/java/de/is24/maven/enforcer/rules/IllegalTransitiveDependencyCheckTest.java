@@ -54,7 +54,7 @@ public class IllegalTransitiveDependencyCheckTest {
 
   private ArtifactStubFactory factory;
 
-  private Set<ClassFileInJar> makeClassFilesInJarSet(Class<?>... classes) {
+  private static Set<ClassFileInJar> makeClassFilesInJarSet(Class<?>... classes) {
     final Set<ClassFileInJar> fileEntries = new HashSet<>();
     for (Class<?> clazz : classes) {
       final ClassLoader classLoader = clazz.getClassLoader();
@@ -159,7 +159,7 @@ public class IllegalTransitiveDependencyCheckTest {
     artifact.setFile(replaceJarWithPacketClassFile(artifact.getFile(), makeClassFilesInJarSet(classes)));
   }
 
-  private File replaceJarWithPacketClassFile(File jar, Set<ClassFileInJar> classFilesInJar) {
+  private static File replaceJarWithPacketClassFile(File jar, Set<ClassFileInJar> classFilesInJar) {
     final String fileName = jar.getAbsolutePath();
     jar.delete();
 
