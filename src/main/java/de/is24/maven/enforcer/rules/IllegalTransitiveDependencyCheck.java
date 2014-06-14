@@ -28,7 +28,7 @@ import java.util.Set;
  *
  * @author aschubert
  */
-public class IllegalTransitiveDependencyCheck implements EnforcerRule {
+class IllegalTransitiveDependencyCheck implements EnforcerRule {
   private static final String NO_CACHE_ID_AVAILABLE = null;
 
   private ArtifactResolver resolver;
