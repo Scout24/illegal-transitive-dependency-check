@@ -46,8 +46,10 @@
     <build.plugin.version>3.1</build.plugin.version>
     <maven.version>2.0.9</maven.version>
     <sl4j.version>1.7.6</sl4j.version>
-    <asm.version>3.1</asm.version>
-    <jdk.version>1.7</jdk.version>
+    <asm.version>5.0.3</asm.version>
+    <jdk.version>1.8</jdk.version>
+    <jacoco.plugin.version>0.7.1.201405082137</jacoco.plugin.version>
+    <coveralls.plugin.version>2.2.0</coveralls.plugin.version>
   </properties>
 
   <build>
@@ -63,12 +65,12 @@
       <plugin>
         <groupId>org.eluder.coveralls</groupId>
         <artifactId>coveralls-maven-plugin</artifactId>
-        <version>2.2.0</version>
+        <version>${coveralls.plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.7.1.201405082137</version>
+        <version>${jacoco.plugin.version}</version>
         <executions>
           <execution>
             <id>prepare-agent</id>
@@ -119,7 +121,7 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>asm</groupId>
+      <groupId>org.ow2.asm</groupId>
       <artifactId>asm-analysis</artifactId>
       <version>${asm.version}</version>
     </dependency>
