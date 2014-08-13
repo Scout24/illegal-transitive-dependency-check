@@ -24,11 +24,11 @@ import java.util.Set;
 
 
 /**
- * IllegalTransitiveDependencyCheck
+ * Rule for enforcing directly declared maven dependencies only 
  *
  * @author aschubert
  */
-class IllegalTransitiveDependencyCheck implements EnforcerRule {
+public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
   private static final String NO_CACHE_ID_AVAILABLE = null;
   private static final String OUTPUT_FILE_EXTENSION = ".txt";
   private static final String OUTPUT_FILE_PREFIX = "itd-";
