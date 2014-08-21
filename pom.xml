@@ -46,7 +46,8 @@
     <maven.version>2.0.9</maven.version>
     <sl4j.version>1.7.6</sl4j.version>
     <asm.version>5.0.3</asm.version>
-    <jdk.version>1.8</jdk.version>
+    <jdk.src.version>1.7</jdk.src.version>
+    <jdk.test.version>1.8</jdk.test.version>
     <jacoco.plugin.version>0.7.1.201405082137</jacoco.plugin.version>
     <coveralls.plugin.version>2.2.0</coveralls.plugin.version>
   </properties>
@@ -56,10 +57,26 @@
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${build.plugin.version}</version>
-        <configuration>
-          <source>${jdk.version}</source>
-          <target>${jdk.version}</target>
-        </configuration>
+        <executions>
+          <execution>
+            <id>default-compile</id>
+            <configuration>
+              <compilerArguments>
+                <source>${jdk.src.version}</source>
+                <target>${jdk.src.version}</target>
+              </compilerArguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>default-testCompile</id>
+            <configuration>
+              <compilerArguments>
+                <source>${jdk.test.version}</source>
+                <target>${jdk.test.version}</target>
+              </compilerArguments>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.eluder.coveralls</groupId>
@@ -80,6 +97,39 @@
         </executions>
       </plugin>
     </plugins>
+    <pluginManagement>
+      <plugins>
+        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>
+                      jacoco-maven-plugin
+                    </artifactId>
+                    <versionRange>
+                      [0.7.1.201405082137,)
+                    </versionRange>
+                    <goals>
+                      <goal>prepare-agent</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 
   <dependencies>
