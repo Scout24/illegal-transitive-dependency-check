@@ -46,7 +46,7 @@
     <maven.version>2.0.9</maven.version>
     <sl4j.version>1.7.6</sl4j.version>
     <asm.version>5.0.3</asm.version>
-    <jdk.version>1.8</jdk.version>
+    <jdk.version>1.7</jdk.version>
     <jacoco.plugin.version>0.7.1.201405082137</jacoco.plugin.version>
     <coveralls.plugin.version>2.2.0</coveralls.plugin.version>
   </properties>
@@ -80,6 +80,39 @@
         </executions>
       </plugin>
     </plugins>
+    <pluginManagement>
+        <plugins>
+            <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+            <plugin>
+                <groupId>org.eclipse.m2e</groupId>
+                <artifactId>lifecycle-mapping</artifactId>
+                <version>1.0.0</version>
+                <configuration>
+                    <lifecycleMappingMetadata>
+                        <pluginExecutions>
+                            <pluginExecution>
+                                <pluginExecutionFilter>
+                                    <groupId>org.jacoco</groupId>
+                                    <artifactId>
+                                        jacoco-maven-plugin
+                                    </artifactId>
+                                    <versionRange>
+                                        [0.7.1.201405082137,)
+                                    </versionRange>
+                                    <goals>
+                                        <goal>prepare-agent</goal>
+                                    </goals>
+                                </pluginExecutionFilter>
+                                <action>
+                                    <ignore></ignore>
+                                </action>
+                            </pluginExecution>
+                        </pluginExecutions>
+                    </lifecycleMappingMetadata>
+                </configuration>
+            </plugin>
+        </plugins>
+    </pluginManagement>
   </build>
 
   <dependencies>
