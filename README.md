@@ -24,7 +24,7 @@ You can run the check by configuring the maven-enforcer-plugin to make use of th
           <dependency>
             <groupId>de.is24.maven.enforcer.rules</groupId>
             <artifactId>illegal-transitive-dependency-check</artifactId>
-            <version>1.1</version>
+            <version>1.3</version>
           </dependency>
         </dependencies>
         <executions>
@@ -57,4 +57,5 @@ The rule itself can be configured to only report violations or to signal the enf
 specifying the attribute `reportOnly`. You may also exclude classes or packages from analysis by providing 
 regex-patterns to parameter `regexIgnoredClasses` (e.g. `my\.suppressed\.Type`).
 
+Releases are available [here](http://repo1.maven.org/maven2/de/is24/maven/enforcer/rules/illegal-transitive-dependency-check/) in Maven's central repository. 
 
