@@ -3,7 +3,6 @@ package de.is24.maven.enforcer.rules;
 import org.apache.maven.plugin.logging.Log;
 
 import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
@@ -12,7 +11,6 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureReader;
 import org.objectweb.asm.signature.SignatureVisitor;
-
 
 /**
  * ClassDependencyResolvingVisitor
@@ -24,12 +22,12 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
     private final Repository repository;
     private final Log logger;
     private final AnnotationVisitor annotationVisitor =
-        new ClassDependencyAnnotationVisitor();
+            new ClassDependencyAnnotationVisitor();
     private final FieldVisitor fieldVisitor = new ClassDependencyFieldVisitor();
     private final MethodVisitor methodVisitor =
-        new ClassDependencyMethodVisitor();
+            new ClassDependencyMethodVisitor();
     private final SignatureVisitor signatureVisitor =
-        new ClassDependencySignatureVisitor();
+            new ClassDependencySignatureVisitor();
 
 
     ClassDependencyResolvingVisitor(Repository repository, Log logger) {
@@ -38,8 +36,9 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
         this.logger = logger;
     }
 
-    @Override public void visit(int version, int access, String name,
-        String signature, String superName, String[] interfaces) {
+    @Override
+    public void visit(int version, int access, String name,
+                      String signature, String superName, String[] interfaces) {
         final String className = readClassName(name);
         logger.debug("Add new type '" + className + "'.");
         repository.addType(className);
@@ -59,13 +58,15 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
     }
 
 
-    @Override public void visitOuterClass(String owner, String name,
-        String desc) {
+    @Override
+    public void visitOuterClass(String owner, String name,
+                                String desc) {
         logger.debug("visit outer class " + desc);
     }
 
-    @Override public FieldVisitor visitField(int access, String name,
-        String desc, String signature, Object value) {
+    @Override
+    public FieldVisitor visitField(int access, String name,
+                                   String desc, String signature, Object value) {
         final String fieldType = readTypeDescription(desc);
         addDependency("field type", fieldType);
 
@@ -74,25 +75,28 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
         return fieldVisitor;
     }
 
-    @Override public AnnotationVisitor visitAnnotation(String desc,
-        boolean visible) {
+    @Override
+    public AnnotationVisitor visitAnnotation(String desc,
+                                             boolean visible) {
         return delegateToAnnotationVisitor(desc);
     }
 
-    @Override public void visitInnerClass(String name, String outerName,
-        String innerName, int access) {
+    @Override
+    public void visitInnerClass(String name, String outerName,
+                                String innerName, int access) {
         final String innerClassName = readClassName(name);
         addDependency("inner class", innerClassName);
     }
 
-    @Override public MethodVisitor visitMethod(int access, String name,
-        String desc, String signature, String[] exceptions) {
+    @Override
+    public MethodVisitor visitMethod(int access, String name,
+                                     String desc, String signature, String[] exceptions) {
         final Type[] argumentTypes = Type.getArgumentTypes(desc);
 
         for (Type argumentType : argumentTypes) {
             final String parameterTypeName = readTypeName(argumentType);
             addDependency("annotation's method parameter type",
-                parameterTypeName);
+                    parameterTypeName);
         }
 
         final Type returnType = Type.getReturnType(desc);
@@ -121,8 +125,11 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
 
     private void addDependency(String typeDescription, String typeName) {
         logger.debug("Add " + typeDescription + " type '" + typeName +
-            "' as dependency.");
-        repository.addDependency(typeName);
+                "' as dependency.");
+
+        // remove brackets in case of an array type..
+        final String typeNameWithoutBrackets = typeName.replaceAll("(\\[|\\])", "");
+        repository.addDependency(typeNameWithoutBrackets);
     }
 
     private String readTypeDescription(String description) {
@@ -147,17 +154,17 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
 
         switch (type.getSort()) {
 
-        case Type.ARRAY: {
-            return readTypeName(type.getElementType());
-        }
+            case Type.ARRAY: {
+                return readTypeName(type.getElementType());
+            }
 
-        case Type.OBJECT: {
-            return type.getClassName();
-        }
+            case Type.OBJECT: {
+                return type.getClassName();
+            }
 
-        default: {
-            return VOID;
-        }
+            default: {
+                return VOID;
+            }
         }
     }
 
@@ -171,50 +178,56 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
     }
 
     private final class ClassDependencySignatureVisitor
-        extends SignatureVisitor {
+            extends SignatureVisitor {
 
         private ClassDependencySignatureVisitor() {
             super(Opcodes.ASM5);
         }
 
-        @Override public void visitClassType(String name) {
+        @Override
+        public void visitClassType(String name) {
             final String classType = readClassName(name);
             addDependency("class type", classType);
         }
 
-        @Override public void visitInnerClassType(String name) {
+        @Override
+        public void visitInnerClassType(String name) {
             final String innerClassType = readClassName(name);
             addDependency("inner class type", innerClassType);
         }
     }
 
     private final class ClassDependencyAnnotationVisitor
-        extends AnnotationVisitor {
+            extends AnnotationVisitor {
 
         private ClassDependencyAnnotationVisitor() {
             super(Opcodes.ASM5);
         }
 
-        @Override public void visit(String name, Object value) {
+        @Override
+        public void visit(String name, Object value) {
             final String valueType = value.getClass().getName();
             addDependency("annotation's value type", valueType);
         }
 
-        @Override public void visitEnum(String name, String desc,
-            String value) {
+        @Override
+        public void visitEnum(String name, String desc,
+                              String value) {
             final String enumType = readTypeDescription(desc);
             addDependency("annotation's enum type", enumType);
         }
 
-        @Override public AnnotationVisitor visitAnnotation(String name,
-            String desc) {
+        @Override
+        public AnnotationVisitor visitAnnotation(String name,
+                                                 String desc) {
             final String annotationType = readTypeDescription(desc);
             addDependency("annotation's annotation type", annotationType);
 
             return this;
         }
 
-        @Override public AnnotationVisitor visitArray(String name) {
+        @Override
+        public AnnotationVisitor visitArray(String name) {
             return this;
         }
     }
@@ -225,8 +238,9 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
             super(Opcodes.ASM5);
         }
 
-        @Override public AnnotationVisitor visitAnnotation(String desc,
-            boolean visible) {
+        @Override
+        public AnnotationVisitor visitAnnotation(String desc,
+                                                 boolean visible) {
             return delegateToAnnotationVisitor(desc);
         }
     }
@@ -237,33 +251,39 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
             super(Opcodes.ASM5);
         }
 
-        @Override public AnnotationVisitor visitAnnotationDefault() {
+        @Override
+        public AnnotationVisitor visitAnnotationDefault() {
             return annotationVisitor;
         }
 
-        @Override public AnnotationVisitor visitAnnotation(String desc,
-            boolean visible) {
+        @Override
+        public AnnotationVisitor visitAnnotation(String desc,
+                                                 boolean visible) {
             return delegateToAnnotationVisitor(desc);
         }
 
-        @Override public AnnotationVisitor visitParameterAnnotation(
-            int parameter, String desc, boolean visible) {
+        @Override
+        public AnnotationVisitor visitParameterAnnotation(
+                int parameter, String desc, boolean visible) {
             return delegateToAnnotationVisitor(desc);
         }
 
-        @Override public void visitTypeInsn(int opcode, String type) {
+        @Override
+        public void visitTypeInsn(int opcode, String type) {
             final String typeName = readClassName(type);
             addDependency("Type instruction type", typeName);
         }
 
-        @Override public void visitFieldInsn(int opcode, String owner,
-            String name, String desc) {
+        @Override
+        public void visitFieldInsn(int opcode, String owner,
+                                   String name, String desc) {
             final String fieldType = readTypeDescription(desc);
             addDependency("field instruction type", fieldType);
         }
 
-        @Override public void visitMethodInsn(int opcode, String owner,
-            String name, String desc, boolean itf) {
+        @Override
+        public void visitMethodInsn(int opcode, String owner,
+                                    String name, String desc, boolean itf) {
             final String ownerType = readClassName(owner);
             addDependency("method owner", ownerType);
 
@@ -279,7 +299,8 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
             addDependency("method return type", returnTypeName);
         }
 
-        @Override public void visitLdcInsn(Object cst) {
+        @Override
+        public void visitLdcInsn(Object cst) {
             final String constantTypeName;
 
             if (cst instanceof Type) {
@@ -292,19 +313,22 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
             addDependency("constant's type", constantTypeName);
         }
 
-        @Override public void visitMultiANewArrayInsn(String desc, int dims) {
+        @Override
+        public void visitMultiANewArrayInsn(String desc, int dims) {
             final String arrayType = readTypeDescription(desc);
             addDependency("array's type", arrayType);
         }
 
-        @Override public void visitTryCatchBlock(Label start, Label end,
-            Label handler, String type) {
+        @Override
+        public void visitTryCatchBlock(Label start, Label end,
+                                       Label handler, String type) {
             final String exceptionType = readClassName(type);
             addDependency("exception type", exceptionType);
         }
 
-        @Override public void visitLocalVariable(String name, String desc,
-            String signature, Label start, Label end, int index) {
+        @Override
+        public void visitLocalVariable(String name, String desc,
+                                       String signature, Label start, Label end, int index) {
             final String localVariableType = readTypeDescription(desc);
             addDependency("local variable", localVariableType);
 
