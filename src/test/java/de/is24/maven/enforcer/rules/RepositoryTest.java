@@ -123,6 +123,20 @@ public class RepositoryTest {
   }
 
   @Test
+  public void testSuppressionOfAnonymousTypeName() {
+    final Repository repository = new Repository(logger);
+
+    assertThat(repository.getTypes().size(), is(0));
+
+    repository.addType("1");
+    assertThat(repository.getTypes().size(), is(0));
+
+    repository.addType("123$2");
+    assertThat(repository.getTypes().size(), is(0));
+  }
+
+
+  @Test
   public void testAddDependency() {
     final Repository repository = new Repository(logger);
     assertThat(repository.getDependencies().size(), is(0));

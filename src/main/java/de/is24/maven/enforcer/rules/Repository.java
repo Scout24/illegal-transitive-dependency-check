@@ -11,7 +11,8 @@ import static java.lang.String.format;
 
 
 final class Repository {
-  private static final String JAVA_TYPES_REGEX = "[BSCFIJVDL]|(java\\.[\\w\\.\\$]*)";
+  // not allowed are primitives, numerical names (for anonymous classes) and all classes in package java
+  private static final String JAVA_TYPES_REGEX = "[0-9\\$]+|[BSCFIJVDL]|(java\\.[\\w\\.\\$]*)";
 
   private final Set<String> types = new HashSet<>();
   private final Set<String> dependencies = new HashSet<>();
@@ -31,7 +32,7 @@ final class Repository {
       }
 
       final String regex = regexBuilder.toString();
-      logger.info("Use type suppression pattern '" + regex + "'.");
+      logger.debug("Use type suppression pattern '" + regex + "'.");
       ignoredClassesPattern = Pattern.compile(regex);
     }
   }

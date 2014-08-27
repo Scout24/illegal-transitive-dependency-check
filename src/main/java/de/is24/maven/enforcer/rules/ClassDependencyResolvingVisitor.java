@@ -124,12 +124,11 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
     }
 
     private void addDependency(String typeDescription, String typeName) {
-        logger.debug("Add " + typeDescription + " type '" + typeName +
-                "' as dependency.");
+        // Issue #6: remove brackets in case of an array type..
+        final String dependency = typeName.replaceAll("(\\[|\\])", "");
 
-        // remove brackets in case of an array type..
-        final String typeNameWithoutBrackets = typeName.replaceAll("(\\[|\\])", "");
-        repository.addDependency(typeNameWithoutBrackets);
+        logger.debug("Add " + typeDescription + " '" + dependency + "' as dependency.");
+        repository.addDependency(dependency);
     }
 
     private String readTypeDescription(String description) {
