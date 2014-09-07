@@ -70,7 +70,7 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
     // add initial field value if any
     if (value != null) {
       final String fieldValueType = getObjectValueType(value);
-      addDependency("field value type", fieldType);
+      addDependency("field value type", fieldValueType);
     }
     processSignature(signature);
 
@@ -136,11 +136,6 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
   }
 
   private String readClassName(String name) {
-    // sometimes we are called with null ;(
-    if (name == null) {
-      return VOID;
-    }
-
     final Type type = Type.getObjectType(name);
     return readTypeName(type);
   }
@@ -297,10 +292,11 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
     }
 
     @Override
-    public void visitTryCatchBlock(Label start, Label end,
-                                   Label handler, String type) {
-      final String exceptionType = readClassName(type);
-      addDependency("exception type", exceptionType);
+    public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
+      if (type != null) {
+        final String exceptionType = readClassName(type);
+        addDependency("exception type", exceptionType);
+      }
     }
 
     @Override
