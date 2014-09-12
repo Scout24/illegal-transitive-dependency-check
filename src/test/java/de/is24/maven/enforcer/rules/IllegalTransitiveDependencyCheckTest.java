@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -38,7 +37,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
 import static java.lang.String.format;
 
 
@@ -56,8 +54,48 @@ public class IllegalTransitiveDependencyCheckTest {
 
   private ArtifactStubFactory factory;
 
-  private static Set<ClassFileInJar> makeClassFilesInJarSet(Class<?>... classes) {
-    final Set<ClassFileInJar> fileEntries = new HashSet<>();
+  @Before
+  public void prepareArtifactStubFactory() throws IOException {
+    factory = new ArtifactStubFactory();
+    factory.setWorkingDir(folder.newFolder("repository"));
+    factory.setCreateFiles(true);
+  }
+
+  @Test
+  public void ruleFiresExceptionOnTransitiveDependency() throws IOException {
+    final EnforcerRuleHelper helper = prepareProjectWithIllegalTransitiveDependencies(false);
+
+    final EnforcerRule rule = new IllegalTransitiveDependencyCheck();
+
+    TestEnforcerRuleUtils.execute(rule, helper, true);
+  }
+
+  @Test
+  public void ruleLogsOnlyTransitiveDependency() throws IOException {
+    final EnforcerRuleHelper helper = prepareProjectWithIllegalTransitiveDependencies(false);
+
+    final IllegalTransitiveDependencyCheck rule = new IllegalTransitiveDependencyCheck();
+    rule.setReportOnly(true);
+    rule.setRegexIgnoredClasses(new String[] { "" });
+
+    TestEnforcerRuleUtils.execute(rule, helper, false);
+  }
+
+  @Test
+  public void tryToUseExistingTargetClassesDirectory() throws IOException {
+    final EnforcerRuleHelper helper = prepareProjectWithIllegalTransitiveDependencies(true);
+    final IllegalTransitiveDependencyCheck rule = new IllegalTransitiveDependencyCheck();
+
+    rule.setReportOnly(true);
+    rule.setRegexIgnoredClasses(new String[] { "" });
+    rule.setUseClassesFromLastBuild(true);
+
+
+    TestEnforcerRuleUtils.execute(rule, helper, false);
+  }
+
+  private static Set<ClassFile> makeClassFileSet(Class<?>... classes) {
+    final Set<ClassFile> fileEntries = new HashSet<>();
     for (Class<?> clazz : classes) {
       final ClassLoader classLoader = clazz.getClassLoader();
       final String resource = clazz.getName().replace('.', '/') + CLASS_SUFFIX;
@@ -71,39 +109,13 @@ public class IllegalTransitiveDependencyCheckTest {
       }
 
       final File classFile = new File(url.getFile());
-      fileEntries.add(new ClassFileInJar(resource, classFile));
+      fileEntries.add(new ClassFile(resource, classFile));
     }
     return fileEntries;
   }
 
-  @Before
-  public void prepareArtifactStubFactory() throws IOException {
-    factory = new ArtifactStubFactory();
-    factory.setWorkingDir(folder.newFolder("repository"));
-    factory.setCreateFiles(true);
-  }
-
-  @Test
-  public void ruleFiresExceptionOnTransitiveDependency() throws IOException {
-    final EnforcerRuleHelper helper = prepareProjectWithIllegalTransitiveDependencies();
-
-    final EnforcerRule rule = new IllegalTransitiveDependencyCheck();
-
-    TestEnforcerRuleUtils.execute(rule, helper, true);
-  }
-
-  @Test
-  public void ruleLogsOnlyTransitiveDependency() throws IOException {
-    final EnforcerRuleHelper helper = prepareProjectWithIllegalTransitiveDependencies();
-
-    final IllegalTransitiveDependencyCheck rule = new IllegalTransitiveDependencyCheck();
-    rule.setReportOnly(true);
-    rule.setRegexIgnoredClasses(new String[]{""});
-
-    TestEnforcerRuleUtils.execute(rule, helper, false);
-  }
-
-  private EnforcerRuleHelper prepareProjectWithIllegalTransitiveDependencies() throws IOException {
+  private EnforcerRuleHelper prepareProjectWithIllegalTransitiveDependencies(boolean createTargetClassDirectory)
+                                                                      throws IOException {
     final MockProject project = new MockProject();
 
     final EnforcerRuleHelperWrapper helper = new EnforcerRuleHelperWrapper(EnforcerTestUtils.getHelper(project));
@@ -116,29 +128,37 @@ public class IllegalTransitiveDependencyCheckTest {
     project.setGroupId(GROUP_ID);
     project.setVersion(ARTIFACT_VERSION);
 
-    makeArtifactJarFromClassFile(artifact, ClassInMavenProjectSource.class);
+    if (createTargetClassDirectory) {
+      makeArtifactTargetClassesDirectory(artifact, ClassInMavenProjectSource.class);
+    } else {
+      makeArtifactJarFromClassFile(artifact, ClassInMavenProjectSource.class);
+    }
 
 
     final Artifact dependency = factory.createArtifact(GROUP_ID, DEPENDENCY_ARTIFACT_ID, ARTIFACT_VERSION);
 
     // add the direct dependency and it's children
-    makeArtifactJarFromClassFile(dependency, ClassInDirectDependency.class,
-        ClassInDirectDependency.EnumInClassInDirectDependency.class);
+    makeArtifactJarFromClassFile(dependency,
+      ClassInDirectDependency.class,
+      ClassInDirectDependency.EnumInClassInDirectDependency.class);
 
 
-    final Artifact transitiveDependency = factory.createArtifact(GROUP_ID, TRANSITIVE_DEPENDENCY_ARTIFACT_ID,
-        ARTIFACT_VERSION);
+    final Artifact transitiveDependency = factory.createArtifact(GROUP_ID,
+      TRANSITIVE_DEPENDENCY_ARTIFACT_ID,
+      ARTIFACT_VERSION);
 
     // add the transitive dependency and the enclosed annotation
-    makeArtifactJarFromClassFile(transitiveDependency, ClassInTransitiveDependency.class,
-        ClassInTransitiveDependency.SomeUsefulAnnotation.class);
+    makeArtifactJarFromClassFile(transitiveDependency,
+      ClassInTransitiveDependency.class,
+      ClassInTransitiveDependency.SomeUsefulAnnotation.class);
 
     final Artifact anotherTransitiveDependency = factory.createArtifact(GROUP_ID,
-        TRANSITIVE_DEPENDENCY_ARTIFACT_ID + "2",
-        ARTIFACT_VERSION);
+      TRANSITIVE_DEPENDENCY_ARTIFACT_ID + "2",
+      ARTIFACT_VERSION);
 
-    makeArtifactJarFromClassFile(anotherTransitiveDependency, ClassInAnotherTransitiveDependency.class,
-        ClassInAnotherTransitiveDependency.EnumInClassInAnotherTransitiveDependency.class);
+    makeArtifactJarFromClassFile(anotherTransitiveDependency,
+      ClassInAnotherTransitiveDependency.class,
+      ClassInAnotherTransitiveDependency.EnumInClassInAnotherTransitiveDependency.class);
 
     // set projects direct dependencies
     project.setDependencyArtifacts(Collections.singleton(dependency));
@@ -157,23 +177,28 @@ public class IllegalTransitiveDependencyCheckTest {
     return helper;
   }
 
-  private void makeArtifactJarFromClassFile(Artifact artifact, Class<?>... classes) {
-    artifact.setFile(replaceJarWithPacketClassFile(artifact.getFile(), makeClassFilesInJarSet(classes)));
+  private void makeArtifactTargetClassesDirectory(Artifact artifact, Class<?> clazz) {
+    final ClassFile classFile = makeClassFileSet(clazz).iterator().next();
+    artifact.setFile(classFile.getClassFile().getParentFile());
   }
 
-  private static File replaceJarWithPacketClassFile(File jar, Set<ClassFileInJar> classFilesInJar) {
+  private void makeArtifactJarFromClassFile(Artifact artifact, Class<?>... classes) {
+    artifact.setFile(replaceJarWithPacketClassFile(artifact.getFile(), makeClassFileSet(classes)));
+  }
+
+  private static File replaceJarWithPacketClassFile(File jar, Set<ClassFile> classFilesInJar) {
     final String fileName = jar.getAbsolutePath();
     jar.delete();
 
     final File newJar = new File(fileName);
 
     try {
-      try (ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(jar))) {
-        for (ClassFileInJar classFileInJar : classFilesInJar) {
-          try (InputStream in = new FileInputStream(classFileInJar.getClassFile())) {
+      try(ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(jar))) {
+        for (ClassFile classFile : classFilesInJar) {
+          try(InputStream in = new FileInputStream(classFile.getClassFile())) {
             final byte[] buffer = new byte[1024];
 
-            zipOutputStream.putNextEntry(new ZipEntry(classFileInJar.getResource()));
+            zipOutputStream.putNextEntry(new ZipEntry(classFile.getResource()));
 
             int bytesRead = in.read(buffer);
             do {
@@ -192,11 +217,11 @@ public class IllegalTransitiveDependencyCheckTest {
     return newJar;
   }
 
-  private static final class ClassFileInJar {
+  private static final class ClassFile {
     private final String resource;
     private final File classFile;
 
-    private ClassFileInJar(String resource, File classFile) {
+    private ClassFile(String resource, File classFile) {
       this.resource = resource;
       this.classFile = classFile;
     }
