@@ -25,7 +25,7 @@ import java.util.Set;
 
 
 /**
- * Rule for enforcing directly declared maven dependencies only
+ * Rule enforcing directly declared maven dependencies only
  *
  * @author aschubert
  */
@@ -159,7 +159,7 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
       if (StringUtils.isNotEmpty(classesOutputDirectory)) {
         final File targetClasses = new File(classesOutputDirectory);
         if (targetClasses.isDirectory() && (targetClasses.list().length > 0)) {
-          logger.debug("Found valid classes directory for artifact '" + project.getId() + "'.");
+          logger.debug("Found valid classes directory '" + targetClasses.getAbsolutePath() + "'.");
           return targetClasses;
         }
       }
