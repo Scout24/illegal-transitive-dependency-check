@@ -20,7 +20,7 @@ import java.util.zip.ZipFile;
  */
 final class ArtifactRepositoryAnalyzer {
   private static final String CLASS_SUFFIX = ".class";
-  private static final Pattern ALLOWED_SUFFIXES = Pattern.compile("\\.(jar|war)");
+  private static final Pattern JAR_FILE_PATTERN = Pattern.compile("^.+\\.(jar|war|JAR|WAR)$");
 
   private final Log logger;
   private final boolean analyzeDependencies;
@@ -51,11 +51,10 @@ final class ArtifactRepositoryAnalyzer {
         analyzeClassesDirectory(repository, artifactFile);
       } else {
         final String absolutePath = artifactFile.getAbsolutePath();
-        final String suffix = absolutePath.toLowerCase().substring(absolutePath.lastIndexOf("."));
-        if (ALLOWED_SUFFIXES.matcher(suffix).matches()) {
+        if (JAR_FILE_PATTERN.matcher(absolutePath).matches()) {
           analyzeJar(repository, artifactFile);
         } else {
-          logger.info("Artifact '" + artifact + "' has associate file of type '" + suffix + "', skip it.");
+          logger.info("Artifact '" + artifact + "' associated file '" + absolutePath + "', is skipped.");
         }
       }
     }

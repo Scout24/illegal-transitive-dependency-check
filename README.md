@@ -10,7 +10,6 @@ Thus the rule will list (or complain about) all classes that are only available 
 
 You can run the check by configuring the maven-enforcer-plugin to make use of the additional rule:
 
-
 ```xml
 <project>
   ...
@@ -24,12 +23,16 @@ You can run the check by configuring the maven-enforcer-plugin to make use of th
           <dependency>
             <groupId>de.is24.maven.enforcer.rules</groupId>
             <artifactId>illegal-transitive-dependency-check</artifactId>
-            <version>1.5</version>
+            <version>1.6-SNAPSHOT</version>
           </dependency>
         </dependencies>
         <executions>
           <execution>
             <id>enforce</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
             <configuration>
               <rules>
                 <illegalTransitiveDependencyCheck implementation="de.is24.maven.enforcer.rules.IllegalTransitiveDependencyCheck">
@@ -37,13 +40,11 @@ You can run the check by configuring the maven-enforcer-plugin to make use of th
                   <regexIgnoredClasses>
                       <regexIgnoredClass>javax\..+</regexIgnoredClass>
                       <regexIgnoredClass>org\.hibernate\..+</regexIgnoredClass>
+                      <useClassesFromLastBuild>true</useClassesFromLastBuild>
                   </regexIgnoredClasses>
                 </illegalTransitiveDependencyCheck>
               </rules>
             </configuration>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
           </execution>
         </executions>
       </plugin>
@@ -56,6 +57,10 @@ You can run the check by configuring the maven-enforcer-plugin to make use of th
 The rule itself can be configured to only report violations or to signal the enforcer-plugin to break the build by 
 specifying the attribute `reportOnly`. You may also exclude classes or packages from analysis by providing 
 regex-patterns to parameter `regexIgnoredClasses` (e.g. `my\.suppressed\.Type`).
+
+By default the rule will resolve the currently analyzed artifact in the Maven repository. In case the enforcer-plugin
+runs in a phase compiled classes are available in the target folder (e.g. `verify`) artifact-resolving can be avoided 
+by setting parameter `useClassesFromLastBuild` to `true`. 
 
 Releases are available [here](http://repo1.maven.org/maven2/de/is24/maven/enforcer/rules/illegal-transitive-dependency-check/) in Maven's central repository. 
 

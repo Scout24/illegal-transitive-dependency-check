@@ -1,0 +1,4 @@
+# ignored resources
+.idea
+*.iml
+target

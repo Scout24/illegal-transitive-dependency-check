@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -22,7 +21,7 @@ public class RepositoryTest {
 
   @Before
   public void setup() {
-    this.logger = new Log() {
+    logger = new Log() {
       @Override
       public boolean isDebugEnabled() {
         return true;
