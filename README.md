@@ -37,10 +37,10 @@ You can run the check by configuring the maven-enforcer-plugin to make use of th
               <rules>
                 <illegalTransitiveDependencyCheck implementation="de.is24.maven.enforcer.rules.IllegalTransitiveDependencyCheck">
                   <reportOnly>false</reportOnly>
+                  <useClassesFromLastBuild>true</useClassesFromLastBuild>
                   <regexIgnoredClasses>
                       <regexIgnoredClass>javax\..+</regexIgnoredClass>
                       <regexIgnoredClass>org\.hibernate\..+</regexIgnoredClass>
-                      <useClassesFromLastBuild>true</useClassesFromLastBuild>
                   </regexIgnoredClasses>
                 </illegalTransitiveDependencyCheck>
               </rules>
