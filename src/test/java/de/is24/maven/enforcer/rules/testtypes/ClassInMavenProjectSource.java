@@ -1,5 +1,8 @@
 package de.is24.maven.enforcer.rules.testtypes;
 
+import com.sun.xml.internal.bind.util.Which;
+
+import javax.sql.DataSource;
 import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.Date;
@@ -27,6 +30,9 @@ public class ClassInMavenProjectSource<X extends String> implements Serializable
         } catch (SQLException e) {
             //
         }
+
+        final DataSource dataSource = null;
+        final Which which = null;
 
         final int k = 3 + 4;
 

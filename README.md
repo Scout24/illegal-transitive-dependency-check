@@ -38,6 +38,7 @@ You can run the check by configuring the maven-enforcer-plugin to make use of th
                 <illegalTransitiveDependencyCheck implementation="de.is24.maven.enforcer.rules.IllegalTransitiveDependencyCheck">
                   <reportOnly>false</reportOnly>
                   <useClassesFromLastBuild>true</useClassesFromLastBuild>
+                  <suppressTypesFromJavaRuntime>true</suppressTypesFromJavaRuntime>
                   <regexIgnoredClasses>
                       <regexIgnoredClass>javax\..+</regexIgnoredClass>
                       <regexIgnoredClass>org\.hibernate\..+</regexIgnoredClass>
@@ -54,9 +55,12 @@ You can run the check by configuring the maven-enforcer-plugin to make use of th
 </project>
 ```
 
-The rule itself can be configured to only report violations or to signal the enforcer-plugin to break the build by 
+The rule itself can be configured to only report violations or even to signal the enforcer-plugin to break the build by 
 specifying the attribute `reportOnly`. You may also exclude classes or packages from analysis by providing 
 regex-patterns to parameter `regexIgnoredClasses` (e.g. `my\.suppressed\.Type`).
+
+In addition to these exclusions types from packages `javax.*` and `com.sun.*` that are available through the current
+Java runtime can be excluded automatically by setting parameter `suppressTypesFromJavaRuntime`.
 
 By default the rule will resolve the currently analyzed artifact in the Maven repository. In case the enforcer-plugin
 runs in a phase compiled classes are available in the target folder (e.g. `verify`) artifact-resolving can be avoided 

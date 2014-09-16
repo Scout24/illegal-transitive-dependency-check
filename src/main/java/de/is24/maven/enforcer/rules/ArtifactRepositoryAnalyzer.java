@@ -25,20 +25,22 @@ final class ArtifactRepositoryAnalyzer {
   private final Log logger;
   private final boolean analyzeDependencies;
   private final String[] regexIgnoredClasses;
+  private final boolean suppressTypesFromJavaRuntime;
 
-  private ArtifactRepositoryAnalyzer(Log logger, boolean analyzeDependencies, String... regexIgnoredClasses) {
+  private ArtifactRepositoryAnalyzer(Log logger, boolean analyzeDependencies, boolean suppressTypesFromJavaRuntime, String... regexIgnoredClasses) {
     this.logger = logger;
     this.analyzeDependencies = analyzeDependencies;
+    this.suppressTypesFromJavaRuntime = suppressTypesFromJavaRuntime;
     this.regexIgnoredClasses = regexIgnoredClasses;
   }
 
-  static ArtifactRepositoryAnalyzer analyzeArtifacts(Log logger, boolean analyzeDependencies,
+  static ArtifactRepositoryAnalyzer analyzeArtifacts(Log logger, boolean analyzeDependencies, boolean suppressTypesFromJavaRuntime,
                                                      String... ignoreClasses) {
-    return new ArtifactRepositoryAnalyzer(logger, analyzeDependencies, ignoreClasses);
+    return new ArtifactRepositoryAnalyzer(logger, analyzeDependencies, suppressTypesFromJavaRuntime, ignoreClasses);
   }
 
   Repository analyzeArtifacts(Iterable<Artifact> artifacts) {
-    final Repository repository = new Repository(logger, regexIgnoredClasses);
+    final Repository repository = new Repository(logger, suppressTypesFromJavaRuntime, regexIgnoredClasses);
 
     for (Artifact artifact : artifacts) {
       final File artifactFile = artifact.getFile();
