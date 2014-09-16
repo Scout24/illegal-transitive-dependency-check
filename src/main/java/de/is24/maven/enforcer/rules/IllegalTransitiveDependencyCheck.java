@@ -148,10 +148,8 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
       }
       return artifact;
     }
-    else
-    {
-        return enforceArtifactResolution(artifact);
-    }
+
+    return enforceArtifactResolution(artifact);
   }
 
   private File getTargetClassesDirectory() {
