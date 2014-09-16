@@ -145,11 +145,13 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
       final File targetClassesDirectory = getTargetClassesDirectory();
       if (targetClassesDirectory != null) {
         artifact.setFile(targetClassesDirectory);
-        return artifact;
       }
+      return artifact;
     }
-
-    return enforceArtifactResolution(artifact);
+    else
+    {
+        return enforceArtifactResolution(artifact);
+    }
   }
 
   private File getTargetClassesDirectory() {
