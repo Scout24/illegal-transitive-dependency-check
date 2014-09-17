@@ -59,7 +59,7 @@ The rule itself can be configured to only report violations or even to signal th
 specifying the attribute `reportOnly`. You may also exclude classes or packages from analysis by providing 
 regex-patterns to parameter `regexIgnoredClasses` (e.g. `my\.suppressed\.Type`).
 
-In addition to these exclusions types from packages `javax.*` and `com.sun.*` that are available through the current
+In addition to these exclusions types from packages `javax.*`,`sun.*`, `jdk.*`, `org.*` and `com.sun.*` that are available through the current
 Java runtime can be excluded automatically by setting parameter `suppressTypesFromJavaRuntime`.
 
 By default the rule will resolve the currently analyzed artifact in the Maven repository. In case the enforcer-plugin

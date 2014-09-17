@@ -1,22 +1,23 @@
 package de.is24.maven.enforcer.rules;
 
 import org.apache.maven.plugin.logging.Log;
-
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
-
 import static java.lang.String.format;
 
 
 final class Repository {
   // not allowed are primitives, numerical names (for anonymous classes) and all classes in package java
   private static final String JAVA_TYPES_REGEX = "[0-9\\$]+|[BSCFIJVDL]|(java\\.[\\w\\.\\$]*)";
+
   // path of current Java runtime environment
   private static final String JAVA_HOME_PATH = "file:" + System.getProperty("java.home");
+  private static final Pattern JAVA_RUNTIME_PACKAGES = Pattern.compile(
+    "^(javax|com\\.sun|org|sun|jdk)\\..+");
 
   private final Set<String> types = new HashSet<>();
   private final Set<String> dependencies = new HashSet<>();
@@ -66,13 +67,15 @@ final class Repository {
     }
 
     // check if javax class comes from current Java runtime..
-    if (suppressTypesFromJavaRuntime && typeFromJavaRuntime(type)) return;
+    if (suppressTypesFromJavaRuntime && typeFromJavaRuntime(type)) {
+      return;
+    }
 
     set.add(type);
   }
 
   private boolean typeFromJavaRuntime(String type) {
-    if (type.startsWith("javax") || type.startsWith("com.sun")) {
+    if (JAVA_RUNTIME_PACKAGES.matcher(type).matches()) {
       final String classResource = type.replace('.', '/') + ".class";
       final URL it = ClassLoader.getSystemClassLoader().getResource(classResource);
       if (it != null) {
