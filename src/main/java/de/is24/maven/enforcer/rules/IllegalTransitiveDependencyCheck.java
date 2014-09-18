@@ -226,20 +226,22 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
       resultFileWriter = new FileWriter(outputFile);
       resultFileWriter.write(output);
     } catch (IOException e) {
-      final String error = "Unable to write output file '" + outputFilePath + "'!";
-      logger.error(error, e);
-      throw new EnforcerRuleException(error, e);
+      throw logAndWrapIOException(e, outputFilePath);
     } finally {
       if (resultFileWriter != null) {
         try {
           resultFileWriter.close();
         } catch (IOException e) {
-          final String error = "Unable to write output file '" + outputFilePath + "'!";
-          logger.error(error, e);
-          throw new EnforcerRuleException(error, e);
+          throw logAndWrapIOException(e, outputFilePath);
         }
       }
     }
+  }
+
+  private EnforcerRuleException logAndWrapIOException(IOException e, String outputFilePath) throws EnforcerRuleException {
+    final String error = "Unable to write output file '" + outputFilePath + "'!";
+    logger.error(error, e);
+    return new EnforcerRuleException(error, e);
   }
 
   private String determineOutputFilePath(Artifact artifact) {
