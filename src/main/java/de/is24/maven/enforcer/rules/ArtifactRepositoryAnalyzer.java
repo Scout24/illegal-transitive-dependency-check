@@ -27,14 +27,16 @@ final class ArtifactRepositoryAnalyzer {
   private final String[] regexIgnoredClasses;
   private final boolean suppressTypesFromJavaRuntime;
 
-  private ArtifactRepositoryAnalyzer(Log logger, boolean analyzeDependencies, boolean suppressTypesFromJavaRuntime, String... regexIgnoredClasses) {
+  private ArtifactRepositoryAnalyzer(Log logger, boolean analyzeDependencies, boolean suppressTypesFromJavaRuntime,
+                                     String... regexIgnoredClasses) {
     this.logger = logger;
     this.analyzeDependencies = analyzeDependencies;
     this.suppressTypesFromJavaRuntime = suppressTypesFromJavaRuntime;
     this.regexIgnoredClasses = regexIgnoredClasses;
   }
 
-  static ArtifactRepositoryAnalyzer analyzeArtifacts(Log logger, boolean analyzeDependencies, boolean suppressTypesFromJavaRuntime,
+  static ArtifactRepositoryAnalyzer analyzeArtifacts(Log logger, boolean analyzeDependencies,
+                                                     boolean suppressTypesFromJavaRuntime,
                                                      String... ignoreClasses) {
     return new ArtifactRepositoryAnalyzer(logger, analyzeDependencies, suppressTypesFromJavaRuntime, ignoreClasses);
   }
@@ -72,7 +74,9 @@ final class ArtifactRepositoryAnalyzer {
         final ZipEntry entry = entries.nextElement();
         final String fileName = entry.getName();
         if (fileName.endsWith(CLASS_SUFFIX)) {
-          logger.debug("Analyze class '" + fileName + "' in JAR '" + jar + "'.");
+          if (logger.isDebugEnabled()) {
+            logger.debug("Analyze class '" + fileName + "' in JAR '" + jar + "'.");
+          }
 
           final ClassReader classReader = new ClassReader(zipFile.getInputStream(entry));
 
@@ -105,7 +109,9 @@ final class ArtifactRepositoryAnalyzer {
 
     final String path = directory.getPath();
     if (path.endsWith(CLASS_SUFFIX)) {
-      logger.debug("Analyze class '" + path + "'.");
+      if (logger.isDebugEnabled()) {
+        logger.debug("Analyze class '" + path + "'.");
+      }
 
       try(FileInputStream classFileStream = new FileInputStream(directory)) {
         final ClassReader classReader = new ClassReader(classFileStream);

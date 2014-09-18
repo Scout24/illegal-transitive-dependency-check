@@ -40,6 +40,8 @@ public class ClassInMavenProjectSource<X extends String> implements Serializable
 
     // types that should come from runtime's rt.jar
     final DataSource dataSource = null;
+    final DataSource secondDataSource = null;
+    final DataSource thirdDataSource = null;
     final Text text = null;
     final DiagnosticCommandMBean dcmb = null;
 
