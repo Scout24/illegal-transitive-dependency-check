@@ -14,6 +14,7 @@ import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluatio
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.StringUtils;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -77,23 +78,23 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
     final Artifact artifact = resolveArtifact();
 
     final Repository artifactClassesRepository = ArtifactRepositoryAnalyzer.analyzeArtifacts(logger,
-      true,
-      suppressTypesFromJavaRuntime,
-      regexIgnoredClasses)
-      .analyzeArtifacts(Collections.singleton(artifact));
+        true,
+        suppressTypesFromJavaRuntime,
+        regexIgnoredClasses)
+                                                                           .analyzeArtifacts(Collections.singleton(artifact));
 
     final Set<Artifact> dependencies = resolveDirectDependencies(artifact);
 
     final Repository dependenciesClassesRepository = ArtifactRepositoryAnalyzer.analyzeArtifacts(logger,
-      false,
-      suppressTypesFromJavaRuntime,
-      regexIgnoredClasses)
-      .analyzeArtifacts(dependencies);
+        false,
+        suppressTypesFromJavaRuntime,
+        regexIgnoredClasses)
+                                                                               .analyzeArtifacts(dependencies);
 
     logger.debug("Artifact's type dependencies are: " + artifactClassesRepository.getDependencies());
     logger.debug("Classes defined in direct dependencies are: " + dependenciesClassesRepository.getTypes());
 
-    final List<String> unresolvedTypes = new ArrayList<>(artifactClassesRepository.getDependencies());
+    final List<String> unresolvedTypes = new ArrayList<String>(artifactClassesRepository.getDependencies());
     unresolvedTypes.removeAll(artifactClassesRepository.getTypes());
     unresolvedTypes.removeAll(dependenciesClassesRepository.getTypes());
 
@@ -192,10 +193,10 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
 
     final StringBuilder illegalDependencies = new StringBuilder();
     illegalDependencies.append("Found ")
-    .append(unresolvedTypes.size())
-    .append(" illegal transitive type dependencies in artifact '")
-    .append(artifact.getId())
-    .append("':\n");
+                       .append(unresolvedTypes.size())
+                       .append(" illegal transitive type dependencies in artifact '")
+                       .append(artifact.getId())
+                       .append("':\n");
 
     int k = 1;
     for (String illegalDependency : unresolvedTypes) {
@@ -220,12 +221,24 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
       throw new EnforcerRuleException(error);
     }
 
-    try(FileWriter resultFileWriter = new FileWriter(outputFile)) {
+    FileWriter resultFileWriter = null;
+    try {
+      resultFileWriter = new FileWriter(outputFile);
       resultFileWriter.write(output);
     } catch (IOException e) {
       final String error = "Unable to write output file '" + outputFilePath + "'!";
       logger.error(error, e);
       throw new EnforcerRuleException(error, e);
+    } finally {
+      if (resultFileWriter != null) {
+        try {
+          resultFileWriter.close();
+        } catch (IOException e) {
+          final String error = "Unable to write output file '" + outputFilePath + "'!";
+          logger.error(error, e);
+          throw new EnforcerRuleException(error, e);
+        }
+      }
     }
   }
 
