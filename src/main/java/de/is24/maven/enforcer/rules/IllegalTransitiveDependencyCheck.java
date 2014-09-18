@@ -1,5 +1,13 @@
 package de.is24.maven.enforcer.rules;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
@@ -14,14 +22,6 @@ import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluatio
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.StringUtils;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 
 /**
@@ -85,7 +85,7 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
     logger.debug("Artifact's type dependencies are: " + artifactClassesRepository.getDependencies());
     logger.debug("Classes defined in direct dependencies are: " + dependenciesClassesRepository.getTypes());
 
-    final List<String> unresolvedTypes = new ArrayList<>(artifactClassesRepository.getDependencies());
+    final List<String> unresolvedTypes = new ArrayList<String>(artifactClassesRepository.getDependencies());
     unresolvedTypes.removeAll(artifactClassesRepository.getTypes());
     unresolvedTypes.removeAll(dependenciesClassesRepository.getTypes());
 
@@ -212,12 +212,31 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
       throw new EnforcerRuleException(error);
     }
 
-    try(FileWriter resultFileWriter = new FileWriter(outputFile)) {
+    FileWriter resultFileWriter = null;
+    try
+    {
+      resultFileWriter = new FileWriter(outputFile);
       resultFileWriter.write(output);
     } catch (IOException e) {
       final String error = "Unable to write output file '" + outputFilePath + "'!";
       logger.error(error, e);
       throw new EnforcerRuleException(error, e);
+    }
+    finally
+    {
+        if (resultFileWriter != null)
+        {
+            try
+            {
+                resultFileWriter.close();
+            }
+            catch (IOException e)
+            {
+                final String error = "Unable to write output file '" + outputFilePath + "'!";
+                logger.error(error, e);
+                throw new EnforcerRuleException(error, e);
+            }
+        }
     }
   }
 

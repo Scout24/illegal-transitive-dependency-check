@@ -14,8 +14,8 @@ final class Repository {
   // not allowed are primitives, numerical names (for anonymous classes) and all classes in package java
   private static final String JAVA_TYPES_REGEX = "[0-9\\$]+|[BSCFIJVDL]|(java\\.[\\w\\.\\$]*)";
 
-  private final Set<String> types = new HashSet<>();
-  private final Set<String> dependencies = new HashSet<>();
+  private final Set<String> types = new HashSet<String>();
+  private final Set<String> dependencies = new HashSet<String>();
 
   private final Pattern ignoredClassesPattern;
   private final Log logger;

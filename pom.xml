@@ -46,7 +46,7 @@
     <maven.version>2.0.9</maven.version>
     <sl4j.version>1.7.6</sl4j.version>
     <asm.version>5.0.3</asm.version>
-    <jdk.src.version>1.7</jdk.src.version>
+    <jdk.src.version>1.6</jdk.src.version>
     <jdk.test.version>1.8</jdk.test.version>
     <jacoco.plugin.version>0.7.1.201405082137</jacoco.plugin.version>
     <coveralls.plugin.version>2.2.0</coveralls.plugin.version>

@@ -1,9 +1,5 @@
 package de.is24.maven.enforcer.rules;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.plugin.logging.Log;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -11,6 +7,10 @@ import java.util.Enumeration;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.plugin.logging.Log;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
 
 
 /**
@@ -64,7 +64,11 @@ final class ArtifactRepositoryAnalyzer {
   private void analyzeJar(Repository repository, File jar) {
     final ClassVisitor classVisitor = new ClassDependencyResolvingVisitor(repository, logger);
 
-    try(ZipFile zipFile = new ZipFile(jar.getAbsolutePath())) {
+    ZipFile zipFile = null;
+    try
+    {
+      zipFile = new ZipFile(jar.getAbsolutePath());
+
       final Enumeration<? extends ZipEntry> entries = zipFile.entries();
       while (entries.hasMoreElements()) {
         final ZipEntry entry = entries.nextElement();
@@ -86,6 +90,22 @@ final class ArtifactRepositoryAnalyzer {
       logger.error(error, e);
       throw new IllegalStateException(error, e);
     }
+    finally
+    {
+        if (zipFile != null)
+        {
+            try
+            {
+                zipFile.close();
+            }
+            catch (IOException e)
+            {
+                final String error = "Unable to read classes from artifact '" + jar + "'.";
+                logger.error(error, e);
+                throw new IllegalStateException(error, e);
+            }
+        }
+    }
   }
 
   private void analyzeClassesDirectory(Repository repository, File classesDirectory) {
@@ -105,7 +125,10 @@ final class ArtifactRepositoryAnalyzer {
     if (path.endsWith(CLASS_SUFFIX)) {
       logger.debug("Analyze class '" + path + "'.");
 
-      try(FileInputStream classFileStream = new FileInputStream(directory)) {
+      FileInputStream classFileStream = null;
+      try
+      {
+        classFileStream = new FileInputStream(directory);
         final ClassReader classReader = new ClassReader(classFileStream);
         if (analyzeDependencies) {
           classReader.accept(classVisitor, ClassReader.SKIP_FRAMES);
@@ -116,6 +139,19 @@ final class ArtifactRepositoryAnalyzer {
         final String error = "Unable to read class from file '" + directory + "'.";
         logger.error(error, e);
         throw new IllegalStateException(error, e);
+      }
+      finally
+      {
+        try
+        {
+            classFileStream.close();
+        }
+        catch (IOException e)
+        {
+            final String error = "Unable to read class from file '" + directory + "'.";
+            logger.error(error, e);
+            throw new IllegalStateException(error, e);
+        }
       }
     }
 
