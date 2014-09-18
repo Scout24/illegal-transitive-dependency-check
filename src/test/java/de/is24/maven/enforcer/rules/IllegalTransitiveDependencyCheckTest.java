@@ -79,6 +79,18 @@ public class IllegalTransitiveDependencyCheckTest {
     TestEnforcerRuleUtils.execute(rule, helper, false);
   }
 
+  @Test
+  public void suppressTypesFromJavaRuntime() throws IOException {
+    final EnforcerRuleHelper helper = prepareProjectWithIllegalTransitiveDependencies(false);
+    final IllegalTransitiveDependencyCheck rule = new IllegalTransitiveDependencyCheck();
+
+    rule.setReportOnly(true);
+    rule.setSuppressTypesFromJavaRuntime(true);
+    rule.setRegexIgnoredClasses(new String[] { "" });
+
+    TestEnforcerRuleUtils.execute(rule, helper, false);
+  }
+
   private EnforcerRuleHelper prepareProjectWithIllegalTransitiveDependencies(boolean createTargetClassDirectory)
                                                                       throws IOException {
     final MockProject project = new MockProject() {

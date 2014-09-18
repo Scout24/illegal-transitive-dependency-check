@@ -106,7 +106,7 @@ public class RepositoryTest {
 
   @Test
   public void testAddType() {
-    final Repository repository = new Repository(logger);
+    final Repository repository = new Repository(logger, false);
 
     assertThat(repository.getTypes().size(), is(0));
 
@@ -123,7 +123,7 @@ public class RepositoryTest {
 
   @Test
   public void testSuppressionOfAnonymousTypeName() {
-    final Repository repository = new Repository(logger);
+    final Repository repository = new Repository(logger, false);
 
     assertThat(repository.getTypes().size(), is(0));
 
@@ -137,7 +137,7 @@ public class RepositoryTest {
 
   @Test
   public void testAddDependency() {
-    final Repository repository = new Repository(logger);
+    final Repository repository = new Repository(logger, false);
     assertThat(repository.getDependencies().size(), is(0));
 
     repository.addDependency("B");
@@ -153,7 +153,7 @@ public class RepositoryTest {
 
   @Test
   public void testSuppressionOfClasses() {
-    final Repository repository = new Repository(logger, "de\\.is24\\.suppress.*", ".*SuppressMe.*");
+    final Repository repository = new Repository(logger, false, "de\\.is24\\.suppress.*", ".*SuppressMe.*");
     assertThat(repository.getDependencies().size(), is(0));
 
     repository.addDependency("de.is24.package.Type");

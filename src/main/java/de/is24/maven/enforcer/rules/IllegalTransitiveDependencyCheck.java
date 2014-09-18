@@ -52,6 +52,8 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
 
   private boolean useClassesFromLastBuild;
 
+  private boolean suppressTypesFromJavaRuntime;
+
   @Override
   public void execute(EnforcerRuleHelper helper) throws EnforcerRuleException {
     logger = helper.getLog();
@@ -64,6 +66,10 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
       logger.info("Flag 'useClassesFromLastBuild' is set. Try to use existing output folder.");
     }
 
+    if (suppressTypesFromJavaRuntime) {
+      logger.info("Flag 'suppressTypesFromJavaRuntime' is set. Classes available in current Java-runtime will be ignored.");
+    }
+
     initializeArtifactResolver(helper);
 
     initializeProject(helper);
@@ -72,6 +78,7 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
 
     final Repository artifactClassesRepository = ArtifactRepositoryAnalyzer.analyzeArtifacts(logger,
       true,
+      suppressTypesFromJavaRuntime,
       regexIgnoredClasses)
       .analyzeArtifacts(Collections.singleton(artifact));
 
@@ -79,6 +86,7 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
 
     final Repository dependenciesClassesRepository = ArtifactRepositoryAnalyzer.analyzeArtifacts(logger,
       false,
+      suppressTypesFromJavaRuntime,
       regexIgnoredClasses)
       .analyzeArtifacts(dependencies);
 
@@ -252,5 +260,9 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
 
   public void setUseClassesFromLastBuild(boolean useClassesFromLastBuild) {
     this.useClassesFromLastBuild = useClassesFromLastBuild;
+  }
+
+  public void setSuppressTypesFromJavaRuntime(boolean suppressTypesFromJavaRuntime) {
+    this.suppressTypesFromJavaRuntime = suppressTypesFromJavaRuntime;
   }
 }

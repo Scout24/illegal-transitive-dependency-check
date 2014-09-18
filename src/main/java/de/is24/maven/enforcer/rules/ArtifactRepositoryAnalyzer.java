@@ -25,20 +25,24 @@ final class ArtifactRepositoryAnalyzer {
   private final Log logger;
   private final boolean analyzeDependencies;
   private final String[] regexIgnoredClasses;
+  private final boolean suppressTypesFromJavaRuntime;
 
-  private ArtifactRepositoryAnalyzer(Log logger, boolean analyzeDependencies, String... regexIgnoredClasses) {
+  private ArtifactRepositoryAnalyzer(Log logger, boolean analyzeDependencies, boolean suppressTypesFromJavaRuntime,
+                                     String... regexIgnoredClasses) {
     this.logger = logger;
     this.analyzeDependencies = analyzeDependencies;
+    this.suppressTypesFromJavaRuntime = suppressTypesFromJavaRuntime;
     this.regexIgnoredClasses = regexIgnoredClasses;
   }
 
   static ArtifactRepositoryAnalyzer analyzeArtifacts(Log logger, boolean analyzeDependencies,
+                                                     boolean suppressTypesFromJavaRuntime,
                                                      String... ignoreClasses) {
-    return new ArtifactRepositoryAnalyzer(logger, analyzeDependencies, ignoreClasses);
+    return new ArtifactRepositoryAnalyzer(logger, analyzeDependencies, suppressTypesFromJavaRuntime, ignoreClasses);
   }
 
   Repository analyzeArtifacts(Iterable<Artifact> artifacts) {
-    final Repository repository = new Repository(logger, regexIgnoredClasses);
+    final Repository repository = new Repository(logger, suppressTypesFromJavaRuntime, regexIgnoredClasses);
 
     for (Artifact artifact : artifacts) {
       final File artifactFile = artifact.getFile();
@@ -70,7 +74,9 @@ final class ArtifactRepositoryAnalyzer {
         final ZipEntry entry = entries.nextElement();
         final String fileName = entry.getName();
         if (fileName.endsWith(CLASS_SUFFIX)) {
-          logger.debug("Analyze class '" + fileName + "' in JAR '" + jar + "'.");
+          if (logger.isDebugEnabled()) {
+            logger.debug("Analyze class '" + fileName + "' in JAR '" + jar + "'.");
+          }
 
           final ClassReader classReader = new ClassReader(zipFile.getInputStream(entry));
 
@@ -103,7 +109,9 @@ final class ArtifactRepositoryAnalyzer {
 
     final String path = directory.getPath();
     if (path.endsWith(CLASS_SUFFIX)) {
-      logger.debug("Analyze class '" + path + "'.");
+      if (logger.isDebugEnabled()) {
+        logger.debug("Analyze class '" + path + "'.");
+      }
 
       try(FileInputStream classFileStream = new FileInputStream(directory)) {
         final ClassReader classReader = new ClassReader(classFileStream);

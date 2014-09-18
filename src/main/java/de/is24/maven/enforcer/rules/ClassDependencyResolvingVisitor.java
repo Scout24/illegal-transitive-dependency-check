@@ -59,7 +59,9 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
 
   @Override
   public void visitOuterClass(String owner, String name, String desc) {
-    logger.debug("visit outer class " + desc);
+    if (logger.isDebugEnabled()) {
+      logger.debug("visit outer class " + desc);
+    }
   }
 
   @Override
@@ -125,7 +127,9 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
     // Issue #6: remove brackets in case of an array type..
     final String dependency = ARRAY_BRACKETS.matcher(typeName).replaceAll("");
 
-    logger.debug("Add " + typeDescription + " '" + dependency + "' as dependency.");
+    if (logger.isDebugEnabled()) {
+      logger.debug("Add " + typeDescription + " '" + dependency + "' as dependency.");
+    }
     repository.addDependency(dependency);
   }
 
