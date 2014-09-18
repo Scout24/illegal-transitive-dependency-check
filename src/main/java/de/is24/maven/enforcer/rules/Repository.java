@@ -1,6 +1,7 @@
 package de.is24.maven.enforcer.rules;
 
 import org.apache.maven.plugin.logging.Log;
+
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
@@ -9,6 +10,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+
 import static java.lang.String.format;
 
 
@@ -19,13 +21,13 @@ final class Repository {
   // path of current Java runtime environment
   private static final String JAVA_HOME_PATH = "file:" + System.getProperty("java.home");
   private static final Pattern JAVA_RUNTIME_PACKAGES = Pattern.compile(
-    "^(javax|com\\.sun|org|sun|jdk)\\..+");
+      "^(javax|com\\.sun|org|sun|jdk)\\..+");
 
-  private final Set<String> types = new HashSet<>();
-  private final Set<String> dependencies = new HashSet<>();
+  private final Set<String> types = new HashSet<String>();
+  private final Set<String> dependencies = new HashSet<String>();
 
   // cache JDK types that already have been checked..
-  private final Map<String, Boolean> alreadyProcessedJavaTypes = new HashMap<>();
+  private final Map<String, Boolean> alreadyProcessedJavaTypes = new HashMap<String, Boolean>();
 
   private final Pattern ignoredClassesPattern;
   private final boolean suppressTypesFromJavaRuntime;

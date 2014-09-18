@@ -10,6 +10,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureReader;
 import org.objectweb.asm.signature.SignatureVisitor;
+
 import java.util.regex.Pattern;
 
 
@@ -97,7 +98,7 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
     for (Type argumentType : argumentTypes) {
       final String parameterTypeName = readTypeName(argumentType);
       addDependency("annotation's method parameter type",
-        parameterTypeName);
+          parameterTypeName);
     }
 
     final Type returnType = Type.getReturnType(desc);
@@ -164,7 +165,7 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
   private void processSignature(String signature) {
     if (signature != null) {
       final SignatureReader signatureReader = new SignatureReader(
-        signature);
+          signature);
       signatureReader.accept(signatureVisitor);
     }
   }
