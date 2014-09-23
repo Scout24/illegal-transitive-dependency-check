@@ -15,8 +15,10 @@ import static java.lang.String.format;
 
 
 final class Repository {
-  // not allowed are primitives, numerical names (for anonymous classes) and all classes in package java
-  private static final String JAVA_TYPES_REGEX = "[0-9\\$]+|[BSCFIJVDL]|(java\\.[\\w\\.\\$]*)";
+  // ignore primitives, numerical names (for anonymous classes) and all classes in package java
+  private static final String JAVA_TYPES_REGEX = "[0-9\\$]+|"+
+      "(boolean)|(byte)|(char)|(short)|(int)|(long)|(float)|(double)|(void)|"+
+      "(java\\.[\\w\\.\\$]*)";
 
   // path of current Java runtime environment
   private static final String JAVA_HOME_PATH = "file:" + System.getProperty("java.home");

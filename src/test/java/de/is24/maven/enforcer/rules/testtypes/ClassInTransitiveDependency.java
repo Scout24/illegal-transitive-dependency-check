@@ -16,6 +16,10 @@ public interface ClassInTransitiveDependency extends Serializable {
   @interface SomeUsefulAnnotation {
     String defaultParameter() default "default";
 
-    String[] arrayParameter();
+    String[] stringArrayParameter();
+
+    int[] intArrayParameter();
+
+    float floatParameter();
   }
 }

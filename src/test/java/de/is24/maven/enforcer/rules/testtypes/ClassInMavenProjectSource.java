@@ -67,7 +67,8 @@ public class ClassInMavenProjectSource<X extends String> implements Serializable
     }
   }
 
-  @ClassInTransitiveDependency.SomeUsefulAnnotation(arrayParameter = { "eins", "zwei", "drei" })
+  @ClassInTransitiveDependency.SomeUsefulAnnotation(stringArrayParameter = { "eins", "zwei", "drei" },
+      intArrayParameter = {1,2,3}, floatParameter = 1.23f)
   public ClassInTransitiveDependency referenceToTransitiveClass;
   public ClassInAnotherTransitiveDependency classInAnotherTransitiveDependency;
 

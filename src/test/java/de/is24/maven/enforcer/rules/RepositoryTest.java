@@ -110,7 +110,7 @@ public class RepositoryTest {
 
     assertThat(repository.getTypes().size(), is(0));
 
-    repository.addType("B");
+    repository.addType("byte");
     assertThat(repository.getTypes().size(), is(0));
 
     repository.addType("java.lang.Fake");
@@ -140,7 +140,7 @@ public class RepositoryTest {
     final Repository repository = new Repository(logger, false);
     assertThat(repository.getDependencies().size(), is(0));
 
-    repository.addDependency("B");
+    repository.addDependency("char");
     assertThat(repository.getDependencies().size(), is(0));
 
     repository.addDependency("java.lang.Fake");

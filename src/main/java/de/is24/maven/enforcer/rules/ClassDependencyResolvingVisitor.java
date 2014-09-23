@@ -125,13 +125,11 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
   }
 
   private void addDependency(String typeDescription, String typeName) {
-    // Issue #6: remove brackets in case of an array type..
-    final String dependency = ARRAY_BRACKETS.matcher(typeName).replaceAll("");
 
     if (logger.isDebugEnabled()) {
-      logger.debug("Add " + typeDescription + " '" + dependency + "' as dependency.");
+      logger.debug("Add " + typeDescription + " '" + typeName + "' as dependency.");
     }
-    repository.addDependency(dependency);
+    repository.addDependency(typeName);
   }
 
   private String readTypeDescription(String description) {
@@ -152,12 +150,8 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
         return readTypeName(type.getElementType());
       }
 
-      case Type.OBJECT: {
-        return type.getClassName();
-      }
-
       default: {
-        return VOID;
+        return type.getClassName();
       }
     }
   }
@@ -214,14 +208,13 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
   }
 
   private static String getObjectValueType(Object value) {
-    String valueType;
+    final Type type;
     if (value instanceof Type) {
-      final Type type = (Type) value;
-      valueType = readTypeName(type);
-    } else {
-      valueType = value.getClass().getCanonicalName();
+      type = (Type) value;
+    } else  {
+      type = Type.getType(value.getClass());
     }
-    return valueType;
+    return readTypeName(type);
   }
 
   private final class ClassDependencyFieldVisitor extends FieldVisitor {
