@@ -1,6 +1,7 @@
 package de.is24.maven.enforcer.rules;
 
 import org.apache.maven.plugin.logging.Log;
+import org.codehaus.plexus.util.StringUtils;
 
 import java.net.URL;
 import java.util.Collection;
@@ -15,8 +16,10 @@ import static java.lang.String.format;
 
 
 final class Repository {
-  // not allowed are primitives, numerical names (for anonymous classes) and all classes in package java
-  private static final String JAVA_TYPES_REGEX = "[0-9\\$]+|[BSCFIJVDL]|(java\\.[\\w\\.\\$]*)";
+  // ignore primitives, numerical names (for anonymous classes) and all classes in package java
+  private static final String JAVA_TYPES_REGEX = "[0-9\\$]+|"+
+      "(boolean)|(byte)|(char)|(short)|(int)|(long)|(float)|(double)|(void)|"+
+      "(java\\.[\\w\\.\\$]*)";
 
   // path of current Java runtime environment
   private static final String JAVA_HOME_PATH = "file:" + System.getProperty("java.home");
@@ -42,7 +45,9 @@ final class Repository {
     } else {
       final StringBuilder regexBuilder = new StringBuilder(JAVA_TYPES_REGEX);
       for (String regex : regexIgnoredClasses) {
-        regexBuilder.append("|(").append(regex).append(")");
+        if (StringUtils.isNotEmpty(regex)) {
+          regexBuilder.append("|(").append(regex).append(")");
+        }
       }
 
       final String regex = regexBuilder.toString();
