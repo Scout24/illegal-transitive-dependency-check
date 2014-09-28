@@ -12,11 +12,6 @@ import org.objectweb.asm.signature.SignatureReader;
 import org.objectweb.asm.signature.SignatureVisitor;
 
 
-/**
- * ClassDependencyResolvingVisitor
- *
- * @author aschubert
- */
 final class ClassDependencyResolvingVisitor extends ClassVisitor {
   private final Repository repository;
   private final Log logger;
@@ -24,7 +19,6 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
   private final FieldVisitor fieldVisitor = new ClassDependencyFieldVisitor();
   private final MethodVisitor methodVisitor = new ClassDependencyMethodVisitor();
   private final SignatureVisitor signatureVisitor = new ClassDependencySignatureVisitor();
-
 
   ClassDependencyResolvingVisitor(Repository repository, Log logger) {
     super(Opcodes.ASM5);
@@ -34,18 +28,18 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
 
   @Override
   public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-    final String className = Types.readClassName(name);
+    final String className = Types.readInternalTypeName(name);
     logger.debug("Add new type '" + className + "'.");
     repository.addType(className);
 
     if (superName != null) {
-      final String superTypeName = Types.readClassName(superName);
+      final String superTypeName = Types.readInternalTypeName(superName);
       addDependency("super type", superTypeName);
     }
 
     if (interfaces != null) {
       for (String iface : interfaces) {
-        final String interfaceType = Types.readClassName(iface);
+        final String interfaceType = Types.readInternalTypeName(iface);
         addDependency("interface type", interfaceType);
       }
     }
@@ -68,7 +62,7 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
 
     // add initial field value if any
     if (value != null) {
-      final String fieldValueType = Types.getObjectValueType(value);
+      final String fieldValueType = Types.readValueType(value);
       addDependency("field value type", fieldValueType);
     }
     processSignature(signature);
@@ -83,7 +77,7 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
 
   @Override
   public void visitInnerClass(String name, String outerName, String innerName, int access) {
-    final String innerClassName = Types.readClassName(name);
+    final String innerClassName = Types.readInternalTypeName(name);
     addDependency("inner class", innerClassName);
   }
 
@@ -92,18 +86,18 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
     final Type[] argumentTypes = Type.getArgumentTypes(desc);
 
     for (Type argumentType : argumentTypes) {
-      final String parameterTypeName = Types.readTypeName(argumentType);
+      final String parameterTypeName = Types.readType(argumentType);
       addDependency("annotation's method parameter type",
         parameterTypeName);
     }
 
     final Type returnType = Type.getReturnType(desc);
-    final String returnTypeName = Types.readTypeName(returnType);
+    final String returnTypeName = Types.readType(returnType);
     addDependency("annotation's method return type", returnTypeName);
 
     if (exceptions != null) {
       for (String exception : exceptions) {
-        final String exceptionName = Types.readClassName(exception);
+        final String exceptionName = Types.readInternalTypeName(exception);
         addDependency("exception type", exceptionName);
       }
     }
@@ -142,7 +136,7 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
 
     @Override
     public void visitClassType(String name) {
-      final String classType = Types.readClassName(name);
+      final String classType = Types.readInternalTypeName(name);
       addDependency("class type", classType);
     }
   }
@@ -154,7 +148,7 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
 
     @Override
     public void visit(String name, Object value) {
-      final String valueType = Types.getObjectValueType(value);
+      final String valueType = Types.readValueType(value);
       addDependency("annotation's value type", valueType);
     }
 
@@ -211,7 +205,7 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
 
     @Override
     public void visitTypeInsn(int opcode, String type) {
-      final String typeName = Types.readClassName(type);
+      final String typeName = Types.readInternalTypeName(type);
       addDependency("Type instruction type", typeName);
     }
 
@@ -223,24 +217,24 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
 
     @Override
     public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-      final String ownerType = Types.readClassName(owner);
+      final String ownerType = Types.readInternalTypeName(owner);
       addDependency("method owner", ownerType);
 
       final Type[] argumentTypes = Type.getArgumentTypes(desc);
 
       for (Type argumentType : argumentTypes) {
-        final String parameterTypeName = Types.readTypeName(argumentType);
+        final String parameterTypeName = Types.readType(argumentType);
         addDependency("method parameter type", parameterTypeName);
       }
 
       final Type returnType = Type.getReturnType(desc);
-      final String returnTypeName = Types.readTypeName(returnType);
+      final String returnTypeName = Types.readType(returnType);
       addDependency("method return type", returnTypeName);
     }
 
     @Override
     public void visitLdcInsn(Object cst) {
-      final String constantTypeName = Types.getObjectValueType(cst);
+      final String constantTypeName = Types.readValueType(cst);
       addDependency("constant's type", constantTypeName);
     }
 
@@ -253,7 +247,7 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
     @Override
     public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
       if (type != null) {
-        final String exceptionType = Types.readClassName(type);
+        final String exceptionType = Types.readInternalTypeName(type);
         addDependency("exception type", exceptionType);
       }
     }

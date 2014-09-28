@@ -7,10 +7,10 @@ public final class Types {
   private Types() {
   }
 
-  static String readTypeName(Type type) {
+  static String readType(Type type) {
     switch (type.getSort()) {
       case Type.ARRAY: {
-        return readTypeName(type.getElementType());
+        return readType(type.getElementType());
       }
 
       default: {
@@ -19,24 +19,23 @@ public final class Types {
     }
   }
 
-  static String getObjectValueType(Object value) {
+  static String readValueType(Object value) {
     final Type type;
     if (value instanceof Type) {
       type = (Type) value;
     } else {
       type = Type.getType(value.getClass());
     }
-    return readTypeName(type);
+    return readType(type);
   }
 
   static String readTypeDescription(String description) {
     final Type type = Type.getType(description);
-
-    return readTypeName(type);
+    return readType(type);
   }
 
-  static String readClassName(String name) {
-    final Type type = Type.getObjectType(name);
-    return readTypeName(type);
+  static String readInternalTypeName(String internalName) {
+    final Type type = Type.getObjectType(internalName);
+    return readType(type);
   }
 }
