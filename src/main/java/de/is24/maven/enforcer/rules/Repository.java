@@ -1,6 +1,7 @@
 package de.is24.maven.enforcer.rules;
 
 import org.apache.maven.plugin.logging.Log;
+import org.codehaus.plexus.util.StringUtils;
 
 import java.net.URL;
 import java.util.Collection;
@@ -44,7 +45,9 @@ final class Repository {
     } else {
       final StringBuilder regexBuilder = new StringBuilder(JAVA_TYPES_REGEX);
       for (String regex : regexIgnoredClasses) {
-        regexBuilder.append("|(").append(regex).append(")");
+        if (StringUtils.isNotEmpty(regex)) {
+          regexBuilder.append("|(").append(regex).append(")");
+        }
       }
 
       final String regex = regexBuilder.toString();

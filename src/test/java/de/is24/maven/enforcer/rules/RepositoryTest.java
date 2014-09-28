@@ -9,11 +9,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 
-/**
- * RepositoryTest
- *
- * @author aschubert
- */
 public class RepositoryTest {
   private static final Logger LOG = LoggerFactory.getLogger(RepositoryTest.class);
 
