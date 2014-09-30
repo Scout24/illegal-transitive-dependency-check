@@ -1,5 +1,13 @@
 package de.is24.maven.enforcer.rules;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
@@ -14,15 +22,6 @@ import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluatio
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.StringUtils;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 
 /**
@@ -167,10 +166,12 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
       final String classesOutputDirectory = build.getOutputDirectory();
       if (StringUtils.isNotEmpty(classesOutputDirectory)) {
         final File targetClasses = new File(classesOutputDirectory);
-        if (targetClasses.isDirectory() && (targetClasses.list().length > 0)) {
-          logger.debug("Found valid classes directory '" + targetClasses.getAbsolutePath() + "'.");
-          return targetClasses;
+        if ( !targetClasses.exists())
+        {
+            targetClasses.mkdirs();
         }
+        logger.debug("Found valid classes directory '" + targetClasses.getAbsolutePath() + "'.");
+        return targetClasses;
       }
     }
     return null;
