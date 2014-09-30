@@ -81,7 +81,7 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
         true,
         suppressTypesFromJavaRuntime,
         regexIgnoredClasses)
-                                                                           .analyzeArtifacts(Collections.singleton(artifact));
+      .analyzeArtifacts(Collections.singleton(artifact));
 
     final Set<Artifact> dependencies = resolveDirectDependencies(artifact);
 
@@ -89,10 +89,12 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
         false,
         suppressTypesFromJavaRuntime,
         regexIgnoredClasses)
-                                                                               .analyzeArtifacts(dependencies);
+      .analyzeArtifacts(dependencies);
 
-    logger.debug("Artifact's type dependencies are: " + artifactClassesRepository.getDependencies());
-    logger.debug("Classes defined in direct dependencies are: " + dependenciesClassesRepository.getTypes());
+    if (logger.isDebugEnabled()) {
+      logger.debug("Artifact's type dependencies are: " + artifactClassesRepository.getDependencies());
+      logger.debug("Classes defined in direct dependencies are: " + dependenciesClassesRepository.getTypes());
+    }
 
     final List<String> unresolvedTypes = new ArrayList<String>(artifactClassesRepository.getDependencies());
     unresolvedTypes.removeAll(artifactClassesRepository.getTypes());
@@ -117,7 +119,9 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
   private Set<Artifact> resolveDirectDependencies(Artifact artifact) {
     final Set<Artifact> dependencies = new HashSet<Artifact>(project.getDependencyArtifacts());
     dependencies.remove(artifact);
-    logger.debug("Direct dependencies are '" + dependencies + "'.");
+    if (logger.isDebugEnabled()){
+      logger.debug("Direct dependencies are '" + dependencies + "'.");
+    }
     return dependencies;
   }
 

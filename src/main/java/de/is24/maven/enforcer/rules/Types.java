@@ -3,7 +3,7 @@ package de.is24.maven.enforcer.rules;
 import org.objectweb.asm.Type;
 
 
-public final class Types {
+final class Types {
   private Types() {
   }
 
