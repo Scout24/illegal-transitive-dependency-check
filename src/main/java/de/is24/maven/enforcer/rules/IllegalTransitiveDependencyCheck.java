@@ -77,6 +77,12 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
 
     final Artifact artifact = resolveArtifact();
 
+    // skip analyzes if the artifact has no associated file..
+    if (artifact.getFile() == null) {
+      logger.info("Nothing to analyze in '" + artifact.getId() + "'.");
+      return;
+    }
+
     final Repository artifactClassesRepository = ArtifactRepositoryAnalyzer.analyzeArtifacts(logger,
         true,
         suppressTypesFromJavaRuntime,
@@ -156,9 +162,7 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
     // use the current project's target/classes directory as fake artifact..
     if (useClassesFromLastBuild) {
       final File targetClassesDirectory = getTargetClassesDirectory();
-      if (targetClassesDirectory != null) {
-        artifact.setFile(targetClassesDirectory);
-      }
+      artifact.setFile(targetClassesDirectory);
       return artifact;
     }
 
@@ -172,11 +176,12 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
       if (StringUtils.isNotEmpty(classesOutputDirectory)) {
         final File targetClasses = new File(classesOutputDirectory);
         if (targetClasses.isDirectory() && (targetClasses.list().length > 0)) {
-          logger.debug("Found valid classes directory '" + targetClasses.getAbsolutePath() + "'.");
+          logger.debug("Found valid target/classes directory '" + targetClasses.getAbsolutePath() + "'.");
           return targetClasses;
         }
       }
     }
+    logger.debug("No target/classes directory found.");
     return null;
   }
 

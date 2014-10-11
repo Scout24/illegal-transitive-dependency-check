@@ -35,6 +35,8 @@ public class IllegalTransitiveDependencyCheckTest {
   private static final String GROUP_ID = "some-group";
   private static final String ARTIFACT_VERSION = "1.0";
 
+  private enum ArtifactFileType {JAR, TARGET_CLASSES, NOTHING}
+
   @Rule
   public final TemporaryFolder folder = new TemporaryFolder();
 
@@ -49,7 +51,7 @@ public class IllegalTransitiveDependencyCheckTest {
 
   @Test
   public void ruleFiresExceptionOnTransitiveDependency() throws IOException {
-    final EnforcerRuleHelper helper = prepareProjectWithIllegalTransitiveDependencies(false);
+    final EnforcerRuleHelper helper = prepareProjectWithIllegalTransitiveDependencies(ArtifactFileType.JAR);
 
     final EnforcerRule rule = new IllegalTransitiveDependencyCheck();
 
@@ -58,7 +60,7 @@ public class IllegalTransitiveDependencyCheckTest {
 
   @Test
   public void ruleLogsOnlyTransitiveDependency() throws IOException {
-    final EnforcerRuleHelper helper = prepareProjectWithIllegalTransitiveDependencies(false);
+    final EnforcerRuleHelper helper = prepareProjectWithIllegalTransitiveDependencies(ArtifactFileType.JAR);
 
     final IllegalTransitiveDependencyCheck rule = new IllegalTransitiveDependencyCheck();
     rule.setReportOnly(true);
@@ -69,7 +71,19 @@ public class IllegalTransitiveDependencyCheckTest {
 
   @Test
   public void tryToUseExistingTargetClassesDirectory() throws IOException {
-    final EnforcerRuleHelper helper = prepareProjectWithIllegalTransitiveDependencies(true);
+    final EnforcerRuleHelper helper = prepareProjectWithIllegalTransitiveDependencies(ArtifactFileType.TARGET_CLASSES);
+    final IllegalTransitiveDependencyCheck rule = new IllegalTransitiveDependencyCheck();
+
+    rule.setReportOnly(true);
+    rule.setRegexIgnoredClasses(new String[] { "" });
+    rule.setUseClassesFromLastBuild(true);
+
+    TestEnforcerRuleUtils.execute(rule, helper, false);
+  }
+
+  @Test
+  public void tryToUseMissingTargetClassesDirectory() throws IOException {
+    final EnforcerRuleHelper helper = prepareProjectWithIllegalTransitiveDependencies(ArtifactFileType.NOTHING);
     final IllegalTransitiveDependencyCheck rule = new IllegalTransitiveDependencyCheck();
 
     rule.setReportOnly(true);
@@ -81,7 +95,7 @@ public class IllegalTransitiveDependencyCheckTest {
 
   @Test
   public void suppressTypesFromJavaRuntime() throws IOException {
-    final EnforcerRuleHelper helper = prepareProjectWithIllegalTransitiveDependencies(false);
+    final EnforcerRuleHelper helper = prepareProjectWithIllegalTransitiveDependencies(ArtifactFileType.JAR);
     final IllegalTransitiveDependencyCheck rule = new IllegalTransitiveDependencyCheck();
 
     rule.setReportOnly(true);
@@ -91,8 +105,8 @@ public class IllegalTransitiveDependencyCheckTest {
     TestEnforcerRuleUtils.execute(rule, helper, false);
   }
 
-  private EnforcerRuleHelper prepareProjectWithIllegalTransitiveDependencies(boolean createTargetClassDirectory)
-                                                                      throws IOException {
+  private EnforcerRuleHelper prepareProjectWithIllegalTransitiveDependencies(ArtifactFileType artifactFileType)
+  throws IOException {
     final MockProject project = new MockProject() {
       private Build build;
       @Override
@@ -116,10 +130,18 @@ public class IllegalTransitiveDependencyCheckTest {
     project.setGroupId(GROUP_ID);
     project.setVersion(ARTIFACT_VERSION);
 
-    if (createTargetClassDirectory) {
-      ClassFileReference.prepareArtifactTargetClassesDirectory(project, ClassInMavenProjectSource.class);
-    } else {
-      ClassFileReference.makeArtifactJarFromClassFile(artifact, ClassInMavenProjectSource.class);
+    switch (artifactFileType) {
+      case JAR:
+        ClassFileReference.makeArtifactJarFromClassFile(artifact, ClassInMavenProjectSource.class);
+        break;
+      case TARGET_CLASSES:
+        ClassFileReference.prepareArtifactTargetClassesDirectory(project, ClassInMavenProjectSource.class);
+        break;
+      case NOTHING:
+        artifact.setFile(null);
+        break;
+      default:
+        throw new IllegalStateException("Unexpected type " + artifactFileType);
     }
 
     final Artifact dependency = factory.createArtifact(GROUP_ID, DEPENDENCY_ARTIFACT_ID, ARTIFACT_VERSION);
