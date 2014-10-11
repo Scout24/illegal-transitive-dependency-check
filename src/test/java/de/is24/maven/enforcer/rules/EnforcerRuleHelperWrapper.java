@@ -14,6 +14,7 @@ import java.util.Map;
 final class EnforcerRuleHelperWrapper implements EnforcerRuleHelper {
   private final EnforcerRuleHelper wrappedEnforcerRuleHelper;
   private final Map<String, Object> components = new HashMap<>();
+  private final Log logger = new LogStub();
 
   EnforcerRuleHelperWrapper(EnforcerRuleHelper wrappedEnforcerRuleHelper) {
     this.wrappedEnforcerRuleHelper = wrappedEnforcerRuleHelper;
@@ -25,7 +26,7 @@ final class EnforcerRuleHelperWrapper implements EnforcerRuleHelper {
 
   @Override
   public Log getLog() {
-    return wrappedEnforcerRuleHelper.getLog();
+    return logger;
   }
 
   @Override

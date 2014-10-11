@@ -87,6 +87,7 @@ final class ClassFileReference {
     final ClassFileReference classFileReference = makeClassFileSet(clazz).iterator().next();
     final Build build = new Build();
     project.setBuild(build);
+    build.setDirectory(classFileReference.getClassFile().getParentFile().getAbsolutePath());
     build.setOutputDirectory(classFileReference.getClassFile().getParentFile().getAbsolutePath());
   }
 
