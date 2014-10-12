@@ -26,6 +26,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertThat;
+
 
 public class IllegalTransitiveDependencyCheckTest {
   private static final Logger LOG = LoggerFactory.getLogger(IllegalTransitiveDependencyCheckTest.class);
@@ -47,6 +51,13 @@ public class IllegalTransitiveDependencyCheckTest {
     factory = new ArtifactStubFactory();
     factory.setWorkingDir(folder.newFolder("repository"));
     factory.setCreateFiles(true);
+  }
+
+  @Test
+  public void ruleIsNotCacheable() {
+    assertThat(new IllegalTransitiveDependencyCheck().isCacheable(), is(false));
+    assertThat(new IllegalTransitiveDependencyCheck().getCacheId(), nullValue());
+    assertThat(new IllegalTransitiveDependencyCheck().isResultValid(null), is(false));
   }
 
   @Test
