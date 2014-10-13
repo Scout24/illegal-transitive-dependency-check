@@ -18,10 +18,12 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -129,8 +131,6 @@ public class IllegalTransitiveDependencyCheckTest {
 
     TestEnforcerRuleUtils.execute(rule, helper, false);
 
-    // we expect the illegal dependencies to be printed into error log!
-
     assertThat(helper.getLog().getWarnLog(),
       containsString("Project's output directory has not been set, skip writing!"));
 
@@ -148,22 +148,24 @@ public class IllegalTransitiveDependencyCheckTest {
   }
 
   private void assertNonJdkDependenciesAreListed(EnforcerRuleHelperWrapper helper) {
-    assertThat(helper.getLog().getErrorLog(),
+    final String errorLog = helper.getLog().getErrorLog();
+    assertThat(errorLog,
       containsString("de.is24.maven.enforcer.rules.testtypes.ClassInAnotherTransitiveDependency"));
-    assertThat(helper.getLog().getErrorLog(),
+    assertThat(errorLog,
       containsString("de.is24.maven.enforcer.rules.testtypes.ClassInTransitiveDependency"));
-    assertThat(helper.getLog().getErrorLog(),
+    assertThat(errorLog,
       containsString("de.is24.maven.enforcer.rules.testtypes.ClassInTransitiveDependency$SomeUsefulAnnotation"));
   }
 
   private void assertJdkDependenciesAreListed(EnforcerRuleHelperWrapper helper) {
-    assertThat(helper.getLog().getErrorLog(),
+    final String errorLog = helper.getLog().getErrorLog();
+    assertThat(errorLog,
       containsString("com.sun.management.DiagnosticCommandMBean"));
-    assertThat(helper.getLog().getErrorLog(),
+    assertThat(errorLog,
       containsString("javax.sql.DataSource"));
-    assertThat(helper.getLog().getErrorLog(),
+    assertThat(errorLog,
       containsString("jdk.Exported"));
-    assertThat(helper.getLog().getErrorLog(),
+    assertThat(errorLog,
       containsString("org.w3c.dom.Text"));
   }
 

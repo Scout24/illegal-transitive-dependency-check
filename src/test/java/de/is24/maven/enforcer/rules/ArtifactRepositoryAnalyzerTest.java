@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.io.File;
 import java.util.Collections;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 
@@ -23,6 +24,8 @@ public class ArtifactRepositoryAnalyzerTest {
     final Repository repository = analyzer.analyzeArtifacts(
       Collections.singleton(artifact));
 
+    assertThat(repository.getTypes().isEmpty(), is(true));
+    assertThat(repository.getDependencies().isEmpty(), is(true));
     assertThat(logger.getInfoLog(),
       containsString("has no associated file, skip it."));
   }
@@ -40,6 +43,8 @@ public class ArtifactRepositoryAnalyzerTest {
     final Repository repository = analyzer.analyzeArtifacts(
       Collections.singleton(artifact));
 
+    assertThat(repository.getTypes().isEmpty(), is(true));
+    assertThat(repository.getDependencies().isEmpty(), is(true));
     assertThat(logger.getInfoLog(), containsString("pom.xml', is skipped"));
   }
 
