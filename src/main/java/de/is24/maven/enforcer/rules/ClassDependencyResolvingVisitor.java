@@ -47,14 +47,6 @@ final class ClassDependencyResolvingVisitor extends ClassVisitor {
     processSignature(signature);
   }
 
-
-  @Override
-  public void visitOuterClass(String owner, String name, String desc) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("visit outer class " + desc);
-    }
-  }
-
   @Override
   public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
     final String fieldType = Types.readTypeDescription(desc);
