@@ -1,8 +1,9 @@
 package de.is24.maven.enforcer.rules;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.junit.Test;
-
+import javax.sql.DataSource;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -77,4 +78,18 @@ public class RepositoryTest {
     assertThat(repository.getDependencies().size(), is(3));
   }
 
+  @Test
+  public void testSuppressionOfJdkTypes() {
+    final Repository repository = new Repository(logger, true);
+    assertThat(repository.getTypes().size(), is(0));
+
+    // add a package not in the current JDK
+    repository.addType(StringUtils.class.getName());
+
+    // add a package that is part of all JDKs
+    repository.addType(DataSource.class.getName());
+
+    assertThat(repository.getTypes().size(), is(1));
+    assertThat(repository.getTypes().iterator().next(), is(StringUtils.class.getName()));
+  }
 }
