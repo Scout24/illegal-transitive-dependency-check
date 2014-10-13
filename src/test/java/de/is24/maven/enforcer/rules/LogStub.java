@@ -1,11 +1,13 @@
 package de.is24.maven.enforcer.rules;
 
 import org.apache.maven.plugin.logging.Log;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 final class LogStub implements Log {
-  private static final Logger LOG = LoggerFactory.getLogger(RepositoryTest.class);
+  private final StringBuilder debugLog = new StringBuilder();
+  private final StringBuilder infoLog = new StringBuilder();
+  private final StringBuilder warnLog = new StringBuilder();
+  private final StringBuilder errorLog = new StringBuilder();
 
   @Override
   public boolean isDebugEnabled() {
@@ -14,17 +16,17 @@ final class LogStub implements Log {
 
   @Override
   public void debug(CharSequence content) {
-    LOG.info(String.valueOf(content));
+    debugLog.append(content).append('\n');
   }
 
   @Override
   public void debug(CharSequence content, Throwable error) {
-    LOG.info(String.valueOf(content), error);
+    debugLog.append(content).append(error).append('\n');
   }
 
   @Override
   public void debug(Throwable error) {
-    LOG.info("", error);
+    debugLog.append(error).append('\n');
   }
 
   @Override
@@ -34,17 +36,17 @@ final class LogStub implements Log {
 
   @Override
   public void info(CharSequence content) {
-    LOG.info(String.valueOf(content));
+    infoLog.append(content).append('\n');
   }
 
   @Override
   public void info(CharSequence content, Throwable error) {
-    LOG.info(String.valueOf(content), error);
+    infoLog.append(content).append(error).append('\n');
   }
 
   @Override
   public void info(Throwable error) {
-    LOG.info("", error);
+    infoLog.append(error).append('\n');
   }
 
   @Override
@@ -54,17 +56,17 @@ final class LogStub implements Log {
 
   @Override
   public void warn(CharSequence content) {
-    LOG.info(String.valueOf(content));
+    warnLog.append(content).append('\n');
   }
 
   @Override
   public void warn(CharSequence content, Throwable error) {
-    LOG.info(String.valueOf(content), error);
+    warnLog.append(content).append(error).append('\n');
   }
 
   @Override
   public void warn(Throwable error) {
-    LOG.info("", error);
+    warnLog.append(error).append('\n');
   }
 
   @Override
@@ -74,16 +76,32 @@ final class LogStub implements Log {
 
   @Override
   public void error(CharSequence content) {
-    LOG.info(String.valueOf(content));
+    errorLog.append(content).append('\n');
   }
 
   @Override
   public void error(CharSequence content, Throwable error) {
-    LOG.info(String.valueOf(content), error);
+    errorLog.append(content).append(error).append('\n');
   }
 
   @Override
   public void error(Throwable error) {
-    LOG.info("", error);
+    errorLog.append(error).append('\n');
+  }
+
+  public String getDebugLog() {
+    return debugLog.toString();
+  }
+
+  public String getInfoLog() {
+    return infoLog.toString();
+  }
+
+  public String getWarnLog() {
+    return warnLog.toString();
+  }
+
+  public String getErrorLog() {
+    return errorLog.toString();
   }
 }

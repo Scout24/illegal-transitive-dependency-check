@@ -1,20 +1,19 @@
 package de.is24.maven.enforcer.rules;
 
 import org.apache.maven.enforcer.rule.api.EnforcerRuleHelper;
-import org.apache.maven.plugin.logging.Log;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 final class EnforcerRuleHelperWrapper implements EnforcerRuleHelper {
   private final EnforcerRuleHelper wrappedEnforcerRuleHelper;
   private final Map<String, Object> components = new HashMap<>();
-  private final Log logger = new LogStub();
+  private final LogStub logStub = new LogStub();
 
   EnforcerRuleHelperWrapper(EnforcerRuleHelper wrappedEnforcerRuleHelper) {
     this.wrappedEnforcerRuleHelper = wrappedEnforcerRuleHelper;
@@ -25,8 +24,8 @@ final class EnforcerRuleHelperWrapper implements EnforcerRuleHelper {
   }
 
   @Override
-  public Log getLog() {
-    return logger;
+  public LogStub getLog() {
+    return logStub;
   }
 
   @Override
