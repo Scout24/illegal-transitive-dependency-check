@@ -3,6 +3,7 @@ The 'Illegal' Transitive Dependency Check Rule
 
 [![Build Status](https://travis-ci.org/ImmobilienScout24/illegal-transitive-dependency-check.svg?branch=master)](https://travis-ci.org/ImmobilienScout24/illegal-transitive-dependency-check)
 [![Coverage Status](https://img.shields.io/coveralls/ImmobilienScout24/illegal-transitive-dependency-check.svg?branch=master)](https://coveralls.io/r/ImmobilienScout24/illegal-transitive-dependency-check)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.is24.maven.enforcer.rules/illegal-transitive-dependency-check/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.is24.maven.enforcer.rules/illegal-transitive-dependency-check/)
 
 The `IllegalTransitiveDependencyCheck` is an additional rule for the `maven-enforcer-plugin`. The rule checks if 
 all classes in a certain artifact references only classes that are provided by explicitly declared dependencies. 
