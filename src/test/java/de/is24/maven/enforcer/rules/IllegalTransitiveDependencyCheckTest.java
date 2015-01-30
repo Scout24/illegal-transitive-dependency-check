@@ -18,12 +18,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -84,6 +82,21 @@ public class IllegalTransitiveDependencyCheckTest {
     assertNumberOfIllegalTransitiveDependencies(helper, 7);
     assertNonJdkDependenciesAreListed(helper);
     assertJdkDependenciesAreListed(helper);
+  }
+
+  @Test
+  public void ruleLogsTransitiveDependenciesWithArtifacts() throws IOException {
+    final EnforcerRuleHelperWrapper helper = prepareProjectWithIllegalTransitiveDependencies(ArtifactFileType.JAR);
+
+    final IllegalTransitiveDependencyCheck rule = new IllegalTransitiveDependencyCheck();
+    rule.setReportOnly(true);
+    rule.setRegexIgnoredClasses(new String[] { "" });
+    rule.setListMissingArtifacts(true);
+
+    TestEnforcerRuleUtils.execute(rule, helper, false);
+
+    assertNumberOfIllegalTransitiveDependencies(helper, 7);
+    assertNonJdkDependenciesAreListedWithArtifactId(helper);
   }
 
   @Test
@@ -155,6 +168,19 @@ public class IllegalTransitiveDependencyCheckTest {
       containsString("de.is24.maven.enforcer.rules.testtypes.ClassInTransitiveDependency"));
     assertThat(errorLog,
       containsString("de.is24.maven.enforcer.rules.testtypes.ClassInTransitiveDependency$SomeUsefulAnnotation"));
+  }
+
+  private void assertNonJdkDependenciesAreListedWithArtifactId(EnforcerRuleHelperWrapper helper) {
+    final String errorLog = helper.getLog().getErrorLog();
+    assertThat(errorLog,
+      containsString(
+        "de.is24.maven.enforcer.rules.testtypes.ClassInAnotherTransitiveDependency, [some-group:transitive-dependency-artifact2:jar:1.0]"));
+    assertThat(errorLog,
+      containsString(
+        "de.is24.maven.enforcer.rules.testtypes.ClassInTransitiveDependency, [some-group:transitive-dependency-artifact:jar:1.0]"));
+    assertThat(errorLog,
+      containsString(
+        "de.is24.maven.enforcer.rules.testtypes.ClassInTransitiveDependency$SomeUsefulAnnotation, [some-group:transitive-dependency-artifact:jar:1.0]"));
   }
 
   private void assertJdkDependenciesAreListed(EnforcerRuleHelperWrapper helper) {
