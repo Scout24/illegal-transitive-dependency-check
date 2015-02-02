@@ -10,6 +10,9 @@ import org.apache.maven.enforcer.rule.api.EnforcerRuleHelper;
 import org.apache.maven.model.Build;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.dependency.graph.DependencyGraphBuilder;
+import org.apache.maven.shared.dependency.graph.DependencyGraphBuilderException;
+import org.apache.maven.shared.dependency.graph.DependencyNode;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
@@ -37,6 +40,8 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
   private ArtifactResolver resolver;
 
   private ArtifactRepository localRepository;
+
+  private DependencyGraphBuilder dependencyGraphBuilder;
 
   private List<ArtifactRepository> remoteRepositories;
 
@@ -66,6 +71,7 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
 
     if (listMissingArtifacts) {
       logger.info("Flag 'listMissingArtifacts' is set. Transitively used artifacts are resolved.");
+      initializeDependencyGraphBuilder(helper);
     }
 
     if (useClassesFromLastBuild) {
@@ -129,13 +135,43 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
   }
 
   @SuppressWarnings("unchecked")
-  private Set<Artifact> resolveTransitiveDependencies(Artifact artifact) {
-    final Set<Artifact> transitiveDependencies = new HashSet<Artifact>(project.getArtifacts());
-    transitiveDependencies.removeAll(resolveDirectDependencies(artifact));
+  private Set<Artifact> resolveTransitiveDependencies(Artifact artifact) throws EnforcerRuleException {
+    final DependencyNode root;
+    try {
+      root = dependencyGraphBuilder.buildDependencyGraph(project, null);
+    } catch (DependencyGraphBuilderException e) {
+      throw new EnforcerRuleException("Unable to build the dependency graph!", e);
+    }
+    if (logger.isDebugEnabled()) {
+      logger.debug("Root node is '" + root + "'.");
+    }
+
+    final Set<Artifact> transitiveDependencies = new HashSet<Artifact>();
+    traverseDependencyNodes(root, transitiveDependencies);
+
+    final Set<Artifact> directDependencies = resolveDirectDependencies(artifact);
+    transitiveDependencies.removeAll(directDependencies);
     if (logger.isDebugEnabled()) {
       logger.debug("Transitive dependencies are '" + transitiveDependencies + "'.");
     }
     return transitiveDependencies;
+  }
+
+  private void traverseDependencyNodes(DependencyNode node, Set<Artifact> transitiveDependencies)
+                                throws EnforcerRuleException {
+    final List<DependencyNode> children = node.getChildren();
+    if ((children == null) || children.isEmpty()) {
+      return;
+    }
+    for (DependencyNode child : children) {
+      final Artifact artifact = child.getArtifact();
+      enforceArtifactResolution(artifact);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Add dependency '" + artifact.getId() + "'");
+      }
+      transitiveDependencies.add(artifact);
+      traverseDependencyNodes(child, transitiveDependencies);
+    }
   }
 
   @SuppressWarnings("unchecked")
@@ -169,6 +205,14 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
       resolver = (ArtifactResolver) helper.getComponent(ArtifactResolver.class);
     } catch (ComponentLookupException e) {
       throw new EnforcerRuleException("Unable to lookup artifact resolver!", e);
+    }
+  }
+
+  private void initializeDependencyGraphBuilder(EnforcerRuleHelper helper) throws EnforcerRuleException {
+    try {
+      dependencyGraphBuilder = helper.getContainer().lookup(DependencyGraphBuilder.class, "default");
+    } catch (ComponentLookupException e) {
+      throw new EnforcerRuleException("Unable to lookup dependency graph builder!", e);
     }
   }
 
@@ -214,7 +258,7 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
     }
   }
 
-  private String buildOutput(Artifact artifact, Set<String> unresolvedTypes) {
+  private String buildOutput(Artifact artifact, Set<String> unresolvedTypes) throws EnforcerRuleException {
     final StringBuilder output = new StringBuilder();
     output.append("Found ")
     .append(unresolvedTypes.size())
@@ -224,7 +268,8 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
 
     final List<String> illegalTransitiveDependencies;
     if (listMissingArtifacts) {
-      illegalTransitiveDependencies = new ArrayList<String>(findArtifactsForUnresolvedTypes(artifact, unresolvedTypes));
+      illegalTransitiveDependencies = new ArrayList<String>(
+        findArtifactsForUnresolvedTypes(artifact, unresolvedTypes));
     } else {
       illegalTransitiveDependencies = new ArrayList<String>(unresolvedTypes);
     }
@@ -239,7 +284,8 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
     return output.toString();
   }
 
-  private Set<String> findArtifactsForUnresolvedTypes(Artifact artifact, Set<String> unresolvedTypes) {
+  private Set<String> findArtifactsForUnresolvedTypes(Artifact artifact, Set<String> unresolvedTypes)
+                                               throws EnforcerRuleException {
     final Set<Artifact> transitiveDependencies = resolveTransitiveDependencies(artifact);
     final Set<String> unresolvedTypesWithArtifact = new HashSet<String>();
 

@@ -1,11 +1,15 @@
 package de.is24.maven.enforcer.rules;
 
 import de.is24.maven.enforcer.rules.testtypes.ClassInAnotherTransitiveDependency;
+import de.is24.maven.enforcer.rules.testtypes.ClassInAnotherTransitiveDependency.EnumInClassInAnotherTransitiveDependency;
 import de.is24.maven.enforcer.rules.testtypes.ClassInDirectDependency;
+import de.is24.maven.enforcer.rules.testtypes.ClassInDirectDependency.EnumInClassInDirectDependency;
 import de.is24.maven.enforcer.rules.testtypes.ClassInMavenProjectSource;
 import de.is24.maven.enforcer.rules.testtypes.ClassInTransitiveDependency;
+import de.is24.maven.enforcer.rules.testtypes.ClassInTransitiveDependency.SomeUsefulAnnotation;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.enforcer.rule.api.EnforcerRule;
 import org.apache.maven.enforcer.rule.api.EnforcerRuleHelper;
 import org.apache.maven.model.Build;
@@ -14,13 +18,22 @@ import org.apache.maven.plugin.testing.stubs.StubArtifactResolver;
 import org.apache.maven.plugins.enforcer.EnforcerTestUtils;
 import org.apache.maven.plugins.enforcer.MockProject;
 import org.apache.maven.plugins.enforcer.utils.TestEnforcerRuleUtils;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.dependency.graph.DependencyGraphBuilder;
+import org.apache.maven.shared.dependency.graph.DependencyNode;
+import org.apache.maven.shared.dependency.graph.internal.DefaultDependencyNode;
+import org.apache.maven.shared.dependency.graph.traversal.DependencyNodeVisitor;
+import org.codehaus.plexus.PlexusContainer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
@@ -92,6 +105,43 @@ public class IllegalTransitiveDependencyCheckTest {
     rule.setReportOnly(true);
     rule.setRegexIgnoredClasses(new String[] { "" });
     rule.setListMissingArtifacts(true);
+
+    final PlexusContainer container = helper.getContainer();
+
+    final DependencyGraphBuilder dependencyGraphBuilder = new DependencyGraphBuilder() {
+      @Override
+      public DependencyNode buildDependencyGraph(MavenProject mavenProject, ArtifactFilter artifactFilter) {
+        final DefaultDependencyNode root = new DefaultDependencyNode(null,
+          mavenProject.getArtifact(),
+          null,
+          null,
+          null);
+
+        final DefaultDependencyNode direct = new DefaultDependencyNode(root,
+          helper.getDirectDependencyArtifact(),
+          null,
+          null,
+          null);
+
+        root.setChildren(Collections.singletonList(direct));
+
+        final List<DependencyNode> transitives = new ArrayList<DependencyNode>();
+        for (Artifact transitiveArtifact : helper.getTransitiveDependencyArtifacts()) {
+          final DependencyNode transitive = new DefaultDependencyNode(direct,
+            transitiveArtifact,
+            null,
+            null,
+            null);
+          transitives.add(transitive);
+        }
+
+        direct.setChildren(transitives);
+
+        return root;
+      }
+    };
+
+    container.addComponent(dependencyGraphBuilder, DependencyGraphBuilder.class, "default");
 
     TestEnforcerRuleUtils.execute(rule, helper, false);
 
@@ -247,7 +297,7 @@ public class IllegalTransitiveDependencyCheckTest {
     // add the direct dependency and it's children
     ClassFileReference.makeArtifactJarFromClassFile(dependency,
       ClassInDirectDependency.class,
-      ClassInDirectDependency.EnumInClassInDirectDependency.class);
+      EnumInClassInDirectDependency.class);
 
 
     final Artifact transitiveDependency = factory.createArtifact(GROUP_ID,
@@ -257,7 +307,7 @@ public class IllegalTransitiveDependencyCheckTest {
     // add the transitive dependency and the enclosed annotation
     ClassFileReference.makeArtifactJarFromClassFile(transitiveDependency,
       ClassInTransitiveDependency.class,
-      ClassInTransitiveDependency.SomeUsefulAnnotation.class);
+      SomeUsefulAnnotation.class);
 
     final Artifact anotherTransitiveDependency = factory.createArtifact(GROUP_ID,
       TRANSITIVE_DEPENDENCY_ARTIFACT_ID + "2",
@@ -265,7 +315,7 @@ public class IllegalTransitiveDependencyCheckTest {
 
     ClassFileReference.makeArtifactJarFromClassFile(anotherTransitiveDependency,
       ClassInAnotherTransitiveDependency.class,
-      ClassInAnotherTransitiveDependency.EnumInClassInAnotherTransitiveDependency.class);
+      EnumInClassInAnotherTransitiveDependency.class);
 
     // set projects direct dependencies
     project.setDependencyArtifacts(Collections.singleton(dependency));
@@ -276,6 +326,12 @@ public class IllegalTransitiveDependencyCheckTest {
     dependencies.add(transitiveDependency);
     dependencies.add(anotherTransitiveDependency);
     project.setArtifacts(dependencies);
+
+    helper.setProjectArtifact(artifact);
+    helper.setDirectDependencyArtifact(dependency);
+    helper.setTransitiveDependencyArtifacts(
+      new HashSet<Artifact>(Arrays.asList(transitiveDependency, anotherTransitiveDependency)));
+
     return helper;
   }
 }
