@@ -44,6 +44,7 @@ You can run the check by configuring the maven-enforcer-plugin to make use of th
                       <regexIgnoredClass>javax\..+</regexIgnoredClass>
                       <regexIgnoredClass>org\.hibernate\..+</regexIgnoredClass>
                   </regexIgnoredClasses>
+                  <listMissingArtifacts>false</listMissingArtifacts>
                 </illegalTransitiveDependencyCheck>
               </rules>
             </configuration>
@@ -65,7 +66,10 @@ Java runtime can be excluded automatically by setting parameter `suppressTypesFr
 
 By default the rule will resolve the currently analyzed artifact in the Maven repository. In case the enforcer-plugin
 runs in a phase compiled classes are available in the target folder (e.g. `verify`) artifact-resolving can be avoided 
-by setting parameter `useClassesFromLastBuild` to `true`. 
+by setting parameter `useClassesFromLastBuild` to `true`.
+ 
+If not only the classes but also the transitively used artifacts should be listed the parameter `listMissingArtifacts` 
+ can be set to `true`. **Caution: This option is really slow!** 
 
 Releases are available [here](http://repo1.maven.org/maven2/de/is24/maven/enforcer/rules/illegal-transitive-dependency-check/) in Maven's central repository. 
 
