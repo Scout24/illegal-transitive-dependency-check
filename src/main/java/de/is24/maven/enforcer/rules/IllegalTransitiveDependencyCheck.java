@@ -17,6 +17,7 @@ import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluatio
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.StringUtils;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -30,7 +31,7 @@ import java.util.Set;
 /**
  * Rule enforcing directly declared maven dependencies only
  *
- * @author aschubert
+ * @author André Schubert
  */
 public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
   private static final String NO_CACHE_ID_AVAILABLE = null;
@@ -60,6 +61,9 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
   private boolean useClassesFromLastBuild;
 
   private boolean suppressTypesFromJavaRuntime;
+
+  private ClassFilter filter;
+
 
   @Override
   public void execute(EnforcerRuleHelper helper) throws EnforcerRuleException {
@@ -95,18 +99,19 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
       return;
     }
 
+    // initialize the suppression filter
+    filter = new ClassFilter(logger, suppressTypesFromJavaRuntime, regexIgnoredClasses);
+
     final Repository artifactClassesRepository = ArtifactRepositoryAnalyzer.analyzeArtifacts(logger,
       true,
-      suppressTypesFromJavaRuntime,
-      regexIgnoredClasses)
+      filter)
       .analyzeArtifacts(Collections.singleton(artifact));
 
     final Set<Artifact> dependencies = resolveDirectDependencies(artifact);
 
     final Repository dependenciesClassesRepository = ArtifactRepositoryAnalyzer.analyzeArtifacts(logger,
       false,
-      suppressTypesFromJavaRuntime,
-      regexIgnoredClasses)
+      filter)
       .analyzeArtifacts(dependencies);
 
     if (logger.isDebugEnabled()) {
@@ -158,7 +163,7 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
   }
 
   private void traverseDependencyNodes(DependencyNode node, Set<Artifact> transitiveDependencies)
-                                throws EnforcerRuleException {
+    throws EnforcerRuleException {
     final List<DependencyNode> children = node.getChildren();
     if ((children == null) || children.isEmpty()) {
       return;
@@ -261,10 +266,10 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
   private String buildOutput(Artifact artifact, Set<String> unresolvedTypes) throws EnforcerRuleException {
     final StringBuilder output = new StringBuilder();
     output.append("Found ")
-    .append(unresolvedTypes.size())
-    .append(" illegal transitive type dependencies in artifact '")
-    .append(artifact.getId())
-    .append("':\n");
+      .append(unresolvedTypes.size())
+      .append(" illegal transitive type dependencies in artifact '")
+      .append(artifact.getId())
+      .append("':\n");
 
     final List<String> illegalTransitiveDependencies;
     if (listMissingArtifacts) {
@@ -285,7 +290,7 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
   }
 
   private Set<String> findArtifactsForUnresolvedTypes(Artifact artifact, Set<String> unresolvedTypes)
-                                               throws EnforcerRuleException {
+    throws EnforcerRuleException {
     final Set<Artifact> transitiveDependencies = resolveTransitiveDependencies(artifact);
     final Set<String> unresolvedTypesWithArtifact = new HashSet<String>();
 
@@ -297,14 +302,13 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
 
       final Repository repository = ArtifactRepositoryAnalyzer.analyzeArtifacts(logger,
         false,
-        suppressTypesFromJavaRuntime,
-        regexIgnoredClasses)
+        filter)
         .analyzeArtifacts(Collections.singleton(transitiveDependency));
 
       final Set<String> repositoryTypes = repository.getTypes();
-      for (String unresovedType : unresolvedTypes) {
-        if (repositoryTypes.contains(unresovedType)) {
-          unresolvedTypesWithArtifact.add(unresovedType + ", [" + transitiveDependency.getId() + "]");
+      for (String unresolvedType : unresolvedTypes) {
+        if (repositoryTypes.contains(unresolvedType)) {
+          unresolvedTypesWithArtifact.add(unresolvedType + ", [" + transitiveDependency.getId() + "]");
         }
       }
     }

@@ -22,12 +22,12 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.dependency.graph.DependencyGraphBuilder;
 import org.apache.maven.shared.dependency.graph.DependencyNode;
 import org.apache.maven.shared.dependency.graph.internal.DefaultDependencyNode;
-import org.apache.maven.shared.dependency.graph.traversal.DependencyNodeVisitor;
 import org.codehaus.plexus.PlexusContainer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,9 +35,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
+
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 
@@ -47,16 +46,8 @@ public class IllegalTransitiveDependencyCheckTest {
   private static final String TRANSITIVE_DEPENDENCY_ARTIFACT_ID = "transitive-dependency-artifact";
   private static final String GROUP_ID = "some-group";
   private static final String ARTIFACT_VERSION = "1.0";
-
-  private enum ArtifactFileType {
-    JAR,
-    TARGET_CLASSES,
-    NOTHING
-  }
-
   @Rule
   public final TemporaryFolder folder = new TemporaryFolder();
-
   private ArtifactStubFactory factory;
 
   @Before
@@ -88,7 +79,7 @@ public class IllegalTransitiveDependencyCheckTest {
 
     final IllegalTransitiveDependencyCheck rule = new IllegalTransitiveDependencyCheck();
     rule.setReportOnly(true);
-    rule.setRegexIgnoredClasses(new String[] { "" });
+    rule.setRegexIgnoredClasses(new String[]{""});
 
     TestEnforcerRuleUtils.execute(rule, helper, false);
 
@@ -103,7 +94,7 @@ public class IllegalTransitiveDependencyCheckTest {
 
     final IllegalTransitiveDependencyCheck rule = new IllegalTransitiveDependencyCheck();
     rule.setReportOnly(true);
-    rule.setRegexIgnoredClasses(new String[] { "" });
+    rule.setRegexIgnoredClasses(new String[]{""});
     rule.setListMissingArtifacts(true);
 
     final PlexusContainer container = helper.getContainer();
@@ -156,7 +147,7 @@ public class IllegalTransitiveDependencyCheckTest {
     final IllegalTransitiveDependencyCheck rule = new IllegalTransitiveDependencyCheck();
 
     rule.setReportOnly(true);
-    rule.setRegexIgnoredClasses(new String[] { "" });
+    rule.setRegexIgnoredClasses(new String[]{""});
     rule.setUseClassesFromLastBuild(true);
 
     TestEnforcerRuleUtils.execute(rule, helper, false);
@@ -171,7 +162,7 @@ public class IllegalTransitiveDependencyCheckTest {
     final IllegalTransitiveDependencyCheck rule = new IllegalTransitiveDependencyCheck();
 
     rule.setReportOnly(true);
-    rule.setRegexIgnoredClasses(new String[] { "" });
+    rule.setRegexIgnoredClasses(new String[]{""});
     rule.setUseClassesFromLastBuild(true);
 
     TestEnforcerRuleUtils.execute(rule, helper, false);
@@ -190,7 +181,7 @@ public class IllegalTransitiveDependencyCheckTest {
 
     rule.setReportOnly(true);
     rule.setSuppressTypesFromJavaRuntime(true);
-    rule.setRegexIgnoredClasses(new String[] { "" });
+    rule.setRegexIgnoredClasses(new String[]{""});
 
     TestEnforcerRuleUtils.execute(rule, helper, false);
 
@@ -246,18 +237,18 @@ public class IllegalTransitiveDependencyCheckTest {
   }
 
   private EnforcerRuleHelperWrapper prepareProjectWithIllegalTransitiveDependencies(ArtifactFileType artifactFileType)
-                                                                             throws IOException {
+    throws IOException {
     final MockProject project = new MockProject() {
       private Build build;
 
       @Override
-      public void setBuild(Build build) {
-        this.build = build;
+      public Build getBuild() {
+        return build;
       }
 
       @Override
-      public Build getBuild() {
-        return build;
+      public void setBuild(Build build) {
+        this.build = build;
       }
     };
 
@@ -333,5 +324,11 @@ public class IllegalTransitiveDependencyCheckTest {
       new HashSet<Artifact>(Arrays.asList(transitiveDependency, anotherTransitiveDependency)));
 
     return helper;
+  }
+
+  private enum ArtifactFileType {
+    JAR,
+    TARGET_CLASSES,
+    NOTHING
   }
 }

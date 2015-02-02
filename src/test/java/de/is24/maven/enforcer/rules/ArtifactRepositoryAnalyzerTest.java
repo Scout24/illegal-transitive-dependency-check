@@ -20,7 +20,7 @@ public class ArtifactRepositoryAnalyzerTest {
     final ArtifactRepositoryAnalyzer analyzer = ArtifactRepositoryAnalyzer.analyzeArtifacts(
       logger,
       false,
-      false);
+      new ClassFilter(logger, false));
 
     final Artifact artifact = makeArtifact(null);
 
@@ -39,7 +39,7 @@ public class ArtifactRepositoryAnalyzerTest {
     final ArtifactRepositoryAnalyzer analyzer = ArtifactRepositoryAnalyzer.analyzeArtifacts(
       logger,
       false,
-      false);
+      new ClassFilter(logger, false));
 
     final Artifact artifact = makeArtifact(new File("pom.xml"));
 
@@ -55,9 +55,9 @@ public class ArtifactRepositoryAnalyzerTest {
   public void invalidJarArtifact() {
     final LogStub logger = new LogStub();
     final ArtifactRepositoryAnalyzer analyzer = ArtifactRepositoryAnalyzer.analyzeArtifacts(
-        logger,
-        false,
-        false);
+      logger,
+      false,
+      new ClassFilter(logger, false));
 
     final Artifact artifact = makeArtifact(new File("invalid.jar"));
 
@@ -76,16 +76,16 @@ public class ArtifactRepositoryAnalyzerTest {
   public void readTypesFromClassDirectory() {
     final LogStub logger = new LogStub();
     final ArtifactRepositoryAnalyzer analyzer = ArtifactRepositoryAnalyzer.analyzeArtifacts(
-        logger,
-        false,
-        false);
+      logger,
+      false,
+      new ClassFilter(logger, false));
 
     final File classFile = getCurrentClassFile();
     final File classesDirectory = new File(classFile.getParent());
     final Artifact artifact = makeArtifact(classesDirectory);
 
     final Repository repository = analyzer.analyzeArtifacts(
-        Collections.singleton(artifact));
+      Collections.singleton(artifact));
 
     assertThat(repository.getTypes().isEmpty(), is(false));
     assertThat(repository.getDependencies().isEmpty(), is(true));

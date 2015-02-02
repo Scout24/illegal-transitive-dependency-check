@@ -20,25 +20,21 @@ final class ArtifactRepositoryAnalyzer {
 
   private final Log logger;
   private final boolean analyzeDependencies;
-  private final String[] regexIgnoredClasses;
-  private final boolean suppressTypesFromJavaRuntime;
+  private final ClassFilter filter;
 
-  private ArtifactRepositoryAnalyzer(Log logger, boolean analyzeDependencies, boolean suppressTypesFromJavaRuntime,
-                                     String... regexIgnoredClasses) {
+  private ArtifactRepositoryAnalyzer(Log logger, boolean analyzeDependencies, ClassFilter filter) {
     this.logger = logger;
     this.analyzeDependencies = analyzeDependencies;
-    this.suppressTypesFromJavaRuntime = suppressTypesFromJavaRuntime;
-    this.regexIgnoredClasses = regexIgnoredClasses;
+    this.filter = filter;
   }
 
   static ArtifactRepositoryAnalyzer analyzeArtifacts(Log logger, boolean analyzeDependencies,
-                                                     boolean suppressTypesFromJavaRuntime,
-                                                     String... ignoreClasses) {
-    return new ArtifactRepositoryAnalyzer(logger, analyzeDependencies, suppressTypesFromJavaRuntime, ignoreClasses);
+                                                     ClassFilter filter) {
+    return new ArtifactRepositoryAnalyzer(logger, analyzeDependencies, filter);
   }
 
   Repository analyzeArtifacts(Iterable<Artifact> artifacts) {
-    final Repository repository = new Repository(logger, suppressTypesFromJavaRuntime, regexIgnoredClasses);
+    final Repository repository = new Repository(filter);
 
     for (Artifact artifact : artifacts) {
       final File artifactFile = artifact.getFile();
@@ -79,10 +75,13 @@ final class ArtifactRepositoryAnalyzer {
 
           final ClassReader classReader = new ClassReader(zipFile.getInputStream(entry));
 
+          final String className = classReader.getClassName().replace('/', '.');
           if (analyzeDependencies) {
-            classReader.accept(classVisitor, ClassReader.SKIP_FRAMES);
+            if (filter.isConsideredType(className)) {
+              classReader.accept(classVisitor, ClassReader.SKIP_FRAMES);
+            }
           } else {
-            repository.addType(classReader.getClassName().replace('/', '.'));
+            repository.addType(className);
           }
         }
       }
@@ -128,10 +127,13 @@ final class ArtifactRepositoryAnalyzer {
       try {
         classFileStream = new FileInputStream(directory);
         final ClassReader classReader = new ClassReader(classFileStream);
+        String className = classReader.getClassName().replace('/', '.');
         if (analyzeDependencies) {
-          classReader.accept(classVisitor, ClassReader.SKIP_FRAMES);
+          if (filter.isConsideredType(className)) {
+            classReader.accept(classVisitor, ClassReader.SKIP_FRAMES);
+          }
         } else {
-          repository.addType(classReader.getClassName().replace('/', '.'));
+          repository.addType(className);
         }
       } catch (IOException e) {
         throw logAndWrapIOException(e, directory, "file");

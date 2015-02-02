@@ -24,7 +24,7 @@ You can run the check by configuring the maven-enforcer-plugin to make use of th
           <dependency>
             <groupId>de.is24.maven.enforcer.rules</groupId>
             <artifactId>illegal-transitive-dependency-check</artifactId>
-            <version>1.7.2</version>
+            <version>1.7.3</version>
           </dependency>
         </dependencies>
         <executions>
