@@ -50,6 +50,8 @@
     <jdk.test.version>1.8</jdk.test.version>
     <jacoco.plugin.version>0.7.1.201405082137</jacoco.plugin.version>
     <coveralls.plugin.version>2.2.0</coveralls.plugin.version>
+    <maven-dependency-tree.version>2.1</maven-dependency-tree.version>
+    <plexus-container.version>1.5.5</plexus-container.version>
   </properties>
 
   <build>
@@ -161,7 +163,12 @@
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-container-default</artifactId>
-      <version>1.5.5</version>
+      <version>${plexus-container.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.shared</groupId>
+      <artifactId>maven-dependency-tree</artifactId>
+      <version>${maven-dependency-tree.version}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

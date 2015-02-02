@@ -2,7 +2,6 @@ package de.is24.maven.enforcer.rules;
 
 import org.apache.maven.plugin.logging.Log;
 import org.codehaus.plexus.util.StringUtils;
-
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,20 +10,19 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-
 import static java.lang.String.format;
 
 
 final class Repository {
   // ignore primitives, numerical names (for anonymous classes) and all classes in package java
-  private static final String JAVA_TYPES_REGEX = "[0-9\\$]+|"+
-      "(boolean)|(byte)|(char)|(short)|(int)|(long)|(float)|(double)|(void)|"+
-      "(java\\.[\\w\\.\\$]*)";
+  private static final String JAVA_TYPES_REGEX = "[0-9\\$]+|" +
+    "(boolean)|(byte)|(char)|(short)|(int)|(long)|(float)|(double)|(void)|" +
+    "(java\\.[\\w\\.\\$]*)";
 
   // path of current Java runtime environment
   private static final String JAVA_HOME_PATH = "file:" + System.getProperty("java.home");
   private static final Pattern JAVA_RUNTIME_PACKAGES = Pattern.compile(
-      "^(javax|com\\.sun|org|sun|jdk)\\..+");
+    "^(javax|com\\.sun|org|sun|jdk)\\..+");
 
   private final Set<String> types = new HashSet<String>();
   private final Set<String> dependencies = new HashSet<String>();
