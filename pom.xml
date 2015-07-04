@@ -27,8 +27,8 @@
   </licenses>
 
   <scm>
-    <connection>scm:git:https://github.com/ImmobilienScout24/illegal-transitive-dependency-check.git</connection>
-    <developerConnection>scm:git:https://github.com/ImmobilienScout24/illegal-transitive-dependency-check.git</developerConnection>
+    <connection>scm:git:ssh://git@github.com:ImmobilienScout24/illegal-transitive-dependency-check.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com:ImmobilienScout24/illegal-transitive-dependency-check.git</developerConnection>
     <url>https://github.com/ImmobilienScout24/illegal-transitive-dependency-check.git</url>
   </scm>
 
