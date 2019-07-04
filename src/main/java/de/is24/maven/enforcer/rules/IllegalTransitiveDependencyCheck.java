@@ -64,6 +64,8 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
 
   private ClassFilter filter;
 
+  private File originalArtifactFile;
+
 
   @Override
   public void execute(EnforcerRuleHelper helper) throws EnforcerRuleException {
@@ -91,50 +93,57 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
 
     initializeProject(helper);
 
-    final Artifact artifact = resolveArtifact();
+    Artifact artifact = null;
+    try {
+      artifact = resolveArtifact();
 
-    // skip analyzes if the artifact has no associated file..
-    if (artifact.getFile() == null) {
-      logger.info("Nothing to analyze in '" + artifact.getId() + "'.");
-      return;
-    }
+      // skip analyzes if the artifact has no associated file..
+      if (artifact.getFile() == null) {
+        logger.info("Nothing to analyze in '" + artifact.getId() + "'.");
+        return;
+      }
 
-    // initialize the suppression filter
-    filter = new ClassFilter(logger, suppressTypesFromJavaRuntime, regexIgnoredClasses);
+      // initialize the suppression filter
+      filter = new ClassFilter(logger, suppressTypesFromJavaRuntime, regexIgnoredClasses);
 
-    final Repository artifactClassesRepository = ArtifactRepositoryAnalyzer.analyzeArtifacts(logger,
-      true,
-      filter)
-      .analyzeArtifacts(Collections.singleton(artifact));
+      final Repository artifactClassesRepository = ArtifactRepositoryAnalyzer.analyzeArtifacts(logger,
+                                                                                               true,
+                                                                                               filter)
+        .analyzeArtifacts(Collections.singleton(artifact));
 
-    final Set<Artifact> dependencies = resolveDirectDependencies(artifact);
+      final Set<Artifact> dependencies = resolveDirectDependencies(artifact);
 
-    final Repository dependenciesClassesRepository = ArtifactRepositoryAnalyzer.analyzeArtifacts(logger,
-      false,
-      filter)
-      .analyzeArtifacts(dependencies);
+      final Repository dependenciesClassesRepository = ArtifactRepositoryAnalyzer.analyzeArtifacts(logger,
+                                                                                                   false,
+                                                                                                   filter)
+        .analyzeArtifacts(dependencies);
 
-    if (logger.isDebugEnabled()) {
-      logger.debug("Artifact's type dependencies are: " + artifactClassesRepository.getDependencies());
-      logger.debug("Classes defined in direct dependencies are: " + dependenciesClassesRepository.getTypes());
-    }
+      if (logger.isDebugEnabled()) {
+        logger.debug("Artifact's type dependencies are: " + artifactClassesRepository.getDependencies());
+        logger.debug("Classes defined in direct dependencies are: " + dependenciesClassesRepository.getTypes());
+      }
 
-    final Set<String> unresolvedTypes = new HashSet<String>(artifactClassesRepository.getDependencies());
-    unresolvedTypes.removeAll(artifactClassesRepository.getTypes());
-    unresolvedTypes.removeAll(dependenciesClassesRepository.getTypes());
+      final Set<String> unresolvedTypes = new HashSet<String>(artifactClassesRepository.getDependencies());
+      unresolvedTypes.removeAll(artifactClassesRepository.getTypes());
+      unresolvedTypes.removeAll(dependenciesClassesRepository.getTypes());
 
-    // traverse transitive dependencies to find the artifact a certain class is loaded from
-    if (unresolvedTypes.isEmpty()) {
-      logger.info("No illegal transitive dependencies found in '" + artifact.getId() + "'.");
-    } else {
-      final String message = buildOutput(artifact, unresolvedTypes);
-
-      writeOutputFile(artifact, message);
-
-      if (reportOnly) {
-        logger.error(message);
+      // traverse transitive dependencies to find the artifact a certain class is loaded from
+      if (unresolvedTypes.isEmpty()) {
+        logger.info("No illegal transitive dependencies found in '" + artifact.getId() + "'.");
       } else {
-        throw new EnforcerRuleException(message);
+        final String message = buildOutput(artifact, unresolvedTypes);
+
+        writeOutputFile(artifact, message);
+
+        if (reportOnly) {
+          logger.error(message);
+        } else {
+          throw new EnforcerRuleException(message);
+        }
+      }
+    } finally {
+      if (artifact != null) {
+        artifact.setFile(originalArtifactFile);
       }
     }
   }
@@ -228,6 +237,7 @@ public final class IllegalTransitiveDependencyCheck implements EnforcerRule {
     // use the current project's target/classes directory as fake artifact..
     if (useClassesFromLastBuild) {
       final File targetClassesDirectory = getTargetClassesDirectory();
+      originalArtifactFile = artifact.getFile();
       artifact.setFile(targetClassesDirectory);
       return artifact;
     }
