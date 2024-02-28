@@ -1,3 +1,7 @@
+This project is end of live and not any longer maintained!
+==========================================================
+
+
 The 'Illegal' Transitive Dependency Check Rule
 ==============================================
 
